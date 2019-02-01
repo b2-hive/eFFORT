@@ -90,10 +90,8 @@ class BToDBGL(BToD):
 
 
 if __name__ == '__main__':
-    import numpy as np
     import matplotlib.pyplot as plt
     from eFFORT.plotting import Tango, init_thesis_plot_style
-    from eFFORT.utility import PDG, BGL_form_factor, z_var
 
     init_thesis_plot_style()
 
