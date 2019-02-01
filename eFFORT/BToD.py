@@ -1,6 +1,8 @@
 import numpy as np
 from eFFORT.utility import BGL_form_factor, z_var, PDG
 import abc
+import scipy.integrate
+import functools
 
 
 class BToD:
@@ -36,6 +38,12 @@ class BToD:
 
         return self.G_F ** 2 * m_D ** 3 / 48 / np.pi ** 3 * (m_B + m_D) ** 2 * (w ** 2 - 1) ** (
                 3 / 2) * self.eta_EW ** 2 * self.V_cb ** 2 * self.G(w)
+
+    @functools.lru_cache(maxsize=1)
+    def Gamma(self):
+        w_min = 1
+        w_max = (self.m_B ** 2 + self.m_D ** 2) / (2 * self.m_B * self.m_D)
+        return scipy.integrate.quad(self.dGamma_dw, w_min, w_max)[0]
 
 
 class BToDCLN(BToD):
@@ -121,3 +129,6 @@ if __name__ == '__main__':
     plt.savefig('BToD_dGamma.png')
     plt.show()
     plt.close()
+
+    print("CLN total rate: {}".format(bToD_glattauer_cln.Gamma()))
+    print("BGL total rate: {}".format(bToD_glattauer_bgl.Gamma()))

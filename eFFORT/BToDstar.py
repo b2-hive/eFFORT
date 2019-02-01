@@ -121,6 +121,15 @@ class BToDstar:
             [[1, w_max], [-1, 1], [-1, 1]]
         )[0]
 
+    @functools.lru_cache(maxsize=1)
+    def Gamma(self):
+        w_min = 1
+        w_max = (self.m_B ** 2 + self.m_Dstar ** 2) / (2 * self.m_B * self.m_Dstar)
+        return scipy.integrate.nquad(
+            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi,
+            [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]]
+        )[0]
+
 
 class BToDstarCLN(BToDstar):
 
@@ -306,3 +315,6 @@ if __name__ == '__main__':
     plt.savefig('BToDstar_dGamma_dcosnu.png')
     plt.show()
     plt.close()
+
+    print("CLN total rate: {}".format(bToDstar_CLN.Gamma()))
+    print("BGL total rate: {}".format(bToDstar_BGL.Gamma()))
