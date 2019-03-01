@@ -159,7 +159,8 @@ class BToDstarCLN(BToDstar):
 
 class BToDstarBGL(BToDstar):
 
-    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066,
+                 exp_coeff=(3.79139e-04, 2.69537e-02, 5.49846e-04, -2.04028e-03, -4.32818e-04, 5.35029e-03)):
         super(BToDstarBGL, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # BGL specifics, default is given in arXiv:1703.08170v2
@@ -170,11 +171,11 @@ class BToDstarBGL(BToDstar):
         self.vector_poles = [6.337, 6.899, 7.012, 7.280]
         # Coefficients from Florian
         self.eta_ew_Vcb = self.eta_EW * self.V_cb
-        self.expansion_coefficients_a = [3.79139e-04 / self.eta_ew_Vcb, 2.69537e-02 / self.eta_ew_Vcb]  # FF g
-        self.expansion_coefficients_b = [5.49846e-04 / self.eta_ew_Vcb, -2.04028e-03 / self.eta_ew_Vcb]  # FF f
+        self.expansion_coefficients_a = [exp_coeff[0] / self.eta_ew_Vcb, exp_coeff[1] / self.eta_ew_Vcb]  # FF g
+        self.expansion_coefficients_b = [exp_coeff[2] / self.eta_ew_Vcb, exp_coeff[3] / self.eta_ew_Vcb]  # FF f
         self.expansion_coefficients_c = [
             ((self.m_B - self.m_Dstar) * self.phi_F1(0) / self.phi_f(0)) * self.expansion_coefficients_b[0],
-            -4.32818e-04 / self.eta_ew_Vcb, 5.35029e-03 / self.eta_ew_Vcb]  # FF F1
+            exp_coeff[4] / self.eta_ew_Vcb, exp_coeff[5] / self.eta_ew_Vcb]  # FF F1
 
         assert sum([a ** 2 for a in self.expansion_coefficients_a]) <= 1, "Unitarity bound violated."
         assert sum([b ** 2 + c ** 2 for b, c in zip(self.expansion_coefficients_b,
