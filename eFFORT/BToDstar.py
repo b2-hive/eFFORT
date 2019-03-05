@@ -2,7 +2,6 @@ import numpy as np
 import scipy.integrate
 from eFFORT.utility import BGL_form_factor, z_var, PDG
 import functools
-import operator
 import abc
 
 
@@ -29,33 +28,26 @@ class BToDstar:
         self.r = self.m_Dstar / self.m_B
         self.rprime = 2 * np.sqrt(self.m_B * self.m_Dstar) / (self.m_B + self.m_Dstar)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def A0(self, w):
         raise RuntimeError("Not implemented. But also not required for light leptons.")
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def A1(self, w):
         return (w + 1) / 2 * self.rprime * self.h_A1(w)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def A2(self, w):
         return self.R2(w) / self.rprime * self.h_A1(w)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def V(self, w):
         return self.R1(w) / self.rprime * self.h_A1(w)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def Hplus(self, w):
         return (self.m_B + self.m_Dstar) * self.A1(w) - 2 * self.m_B / (self.m_B + self.m_Dstar) * self.m_Dstar * (
                 w ** 2 - 1) ** 0.5 * self.V(w)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def Hminus(self, w):
         return (self.m_B + self.m_Dstar) * self.A1(w) + 2 * self.m_B / (self.m_B + self.m_Dstar) * self.m_Dstar * (
                 w ** 2 - 1) ** 0.5 * self.V(w)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def Hzero(self, w):
         m_B = self.m_B
         m_D = self.m_Dstar
@@ -142,17 +134,14 @@ class BToDstarCLN(BToDstar):
         self.R1_1 = 1.38
         self.R2_1 = 0.97
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def h_A1(self, w):
         rho2 = self.rho2
         _z = z_var(w)
         return self.h_A1_1 * (1 - 8 * rho2 * _z + (53 * rho2 - 15) * _z ** 2 - (231 * rho2 - 91) * _z ** 3)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def R1(self, w):
         return self.R1_1 - 0.12 * (w - 1) + 0.05 * (w - 1) ** 2
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def R2(self, w):
         return self.R2_1 + 0.11 * (w - 1) - 0.06 * (w - 1) ** 2
 
@@ -181,38 +170,32 @@ class BToDstarBGL(BToDstar):
         assert sum([b ** 2 + c ** 2 for b, c in zip(self.expansion_coefficients_b,
                                                     self.expansion_coefficients_c)]) <= 1, "Unitarity bound violated."
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def h_A1(self, w):
         z = z_var(w)
         return self.f(z) / (self.m_B * self.m_Dstar) ** 0.5 / (1 + w)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def R1(self, w):
         z = z_var(w)
         return (w + 1) * self.m_B * self.m_Dstar * self.g(z) / self.f(z)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def R2(self, w):
         z = z_var(w)
         return (w - self.r) / (w - 1) - self.F1(z) / self.m_B / (w - 1) / self.f(z)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def g(self, z):
         return BGL_form_factor(z, lambda x: self.blaschke_factor(x, self.vector_poles), self.phi_g,
                                self.expansion_coefficients_a)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def f(self, z):
         return BGL_form_factor(z, lambda x: self.blaschke_factor(x, self.axialvector_poles), self.phi_f,
                                self.expansion_coefficients_b)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def F1(self, z):
         return BGL_form_factor(z, lambda x: self.blaschke_factor(x, self.axialvector_poles), self.phi_F1,
                                self.expansion_coefficients_c)
 
     def blaschke_factor(self, z, poles):
-        return functools.reduce(operator.mul, [(z - self.z_p(m_pole)) / (1 - z * self.z_p(m_pole)) for m_pole in poles])
+        return np.multiply.reduce([(z - self.z_p(m_pole)) / (1 - z * self.z_p(m_pole)) for m_pole in poles])
 
     def z_p(self, m_pole):
         m_B = self.m_B
@@ -221,19 +204,16 @@ class BToDstarBGL(BToDstar):
         term2 = ((m_B + m_D) ** 2 - (m_B - m_D) ** 2) ** 0.5
         return (term1 - term2) / (term1 + term2)
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def phi_g(self, z):
         r = self.r
         return (256 * self.n_i / 3 / np.pi / self.chiT_plus33) ** 0.5 \
                * r ** 2 * (1 + z) ** 2 * (1 - z) ** -0.5 / ((1 + r) * (1 - z) + 2 * r ** 0.5 * (1 + z)) ** 4
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def phi_f(self, z):
         r = self.r
         return 1 / self.m_B ** 2 * (16 * self.n_i / 3 / np.pi / self.chiT_minus33) ** 0.5 \
                * r * (1 + z) * (1 - z) ** (3. / 2) / ((1 + r) * (1 - z) + 2 * r ** 0.5 * (1 + z)) ** 4
 
-    @functools.lru_cache(maxsize=2 ** 10)
     def phi_F1(self, z):
         r = self.r
         return 1 / self.m_B ** 3 * (8 * self.n_i / 3 / np.pi / self.chiT_minus33) ** 0.5 \
@@ -256,6 +236,9 @@ if __name__ == '__main__':
     cosl_range = np.linspace(-1, 1, endpoint=True)
     cosnu_range = np.linspace(-1, 1, endpoint=True)
     chi_range = np.linspace(0, 2 * np.pi, endpoint=True)
+
+    # Example call with numpy arrays
+    print(bToDstar_BGL.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w_range, cosl_range, cosnu_range, chi_range))
 
     plt.plot(w_range, [bToDstar_CLN.dGamma_dw(x) * 1e15 for x in w_range],
              color=Tango.slate, ls='solid', lw=2, label='CLN arXiv:1702.01521v2')

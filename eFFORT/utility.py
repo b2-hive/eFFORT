@@ -26,7 +26,7 @@ def w(q2: float, m_parent: float, m_daughter: float) -> float:
     return (m_parent ** 2 + m_daughter ** 2 - q2) / (2 * m_parent * m_daughter)
 
 
-def z_var(w: float) -> float:
+def z_var(w):
     """
     BGL expansion parameter.
     :param w: Recoil variable w.
@@ -37,7 +37,7 @@ def z_var(w: float) -> float:
     return (term1 - term2) / (term1 + term2)
 
 
-def BGL_form_factor(z: float, p, phi, a: list) -> float:
+def BGL_form_factor(z, p, phi, a: list):
     """
     Calculates the BGL form factor.
     :param z: BGL expansion parameter.
