@@ -28,6 +28,8 @@ class BToDstar:
         self.r = self.m_Dstar / self.m_B
         self.rprime = 2 * np.sqrt(self.m_B * self.m_Dstar) / (self.m_B + self.m_Dstar)
 
+        self._gamma_int = None
+
     def A0(self, w):
         raise RuntimeError("Not implemented. But also not required for light leptons.")
 
@@ -113,8 +115,10 @@ class BToDstar:
             [[1, w_max], [-1, 1], [-1, 1]]
         )[0]
 
-    @functools.lru_cache(maxsize=1)
     def Gamma(self):
+        return self._gamma_int
+
+    def _Gamma(self):
         w_min = 1
         w_max = (self.m_B ** 2 + self.m_Dstar ** 2) / (2 * self.m_B * self.m_Dstar)
         return scipy.integrate.nquad(
@@ -133,6 +137,8 @@ class BToDstarCLN(BToDstar):
         self.rho2 = 1.03
         self.R1_1 = 1.38
         self.R2_1 = 0.97
+
+        self._gamma_int = self._Gamma()
 
     def h_A1(self, w):
         rho2 = self.rho2
@@ -169,6 +175,7 @@ class BToDstarBGL(BToDstar):
         assert sum([a ** 2 for a in self.expansion_coefficients_a]) <= 1, "Unitarity bound violated."
         assert sum([b ** 2 + c ** 2 for b, c in zip(self.expansion_coefficients_b,
                                                     self.expansion_coefficients_c)]) <= 1, "Unitarity bound violated."
+        self._gamma_int = self._Gamma()
 
     def h_A1(self, w):
         z = z_var(w)
@@ -197,6 +204,7 @@ class BToDstarBGL(BToDstar):
     def blaschke_factor(self, z, poles):
         return np.multiply.reduce([(z - self.z_p(m_pole)) / (1 - z * self.z_p(m_pole)) for m_pole in poles])
 
+    @functools.lru_cache(2**10)
     def z_p(self, m_pole):
         m_B = self.m_B
         m_D = self.m_Dstar
