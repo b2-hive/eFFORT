@@ -5,7 +5,7 @@ import functools
 import abc
 
 
-class BToDstar:
+class BToDstarLNu:
     """
     A class containing functions specific to the differential decay rate of the B to Dstar transitions with the BCL/BGL
     parametrization. If not states otherwise, the numerical values and variable/function definitions are taken from:
@@ -123,10 +123,10 @@ class BToDstar:
         )[0]
 
 
-class BToDstarCLN(BToDstar):
+class BToDstarLNuCLN(BToDstarLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
-        super(BToDstarCLN, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+        super(BToDstarLNuCLN, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # CLN specifics, default is given by values in https://arxiv.org/abs/1702.01521v2
         self.h_A1_1 = 0.906
@@ -146,10 +146,10 @@ class BToDstarCLN(BToDstar):
         return self.R2_1 + 0.11 * (w - 1) - 0.06 * (w - 1) ** 2
 
 
-class BToDstarBGL(BToDstar):
+class BToDstarLNuBGL(BToDstarLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
-        super(BToDstarBGL, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+        super(BToDstarLNuBGL, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # BGL specifics, default is given in arXiv:1703.08170v2
         self.chiT_plus33 = 5.28e-4  # GeV^-2
@@ -225,8 +225,8 @@ if __name__ == '__main__':
 
     init_thesis_plot_style()
 
-    bToDstar_CLN = BToDstarCLN(PDG.m_Bplus, PDG.m_Dstarzero, 37.4e-3)
-    bToDstar_BGL = BToDstarBGL(PDG.m_Bplus, PDG.m_Dstarzero, 41.6558e-3)
+    bToDstar_CLN = BToDstarLNuCLN(PDG.m_Bplus, PDG.m_Dstarzero, 37.4e-3)
+    bToDstar_BGL = BToDstarLNuBGL(PDG.m_Bplus, PDG.m_Dstarzero, 41.6558e-3)
 
     w_min = 1
     w_max = (bToDstar_CLN.m_B ** 2 + bToDstar_CLN.m_Dstar ** 2) / (2 * bToDstar_CLN.m_B * bToDstar_CLN.m_Dstar)
