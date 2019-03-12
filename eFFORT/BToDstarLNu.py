@@ -5,7 +5,7 @@ import functools
 import abc
 
 
-class BToDstar:
+class BToDstarLNu:
     """
     A class containing functions specific to the differential decay rate of the B to Dstar transitions with the BCL/BGL
     parametrization. If not states otherwise, the numerical values and variable/function definitions are taken from:
@@ -23,6 +23,9 @@ class BToDstar:
         self.V_cb = V_cb
         self.eta_EW = eta_EW
         self.G_F = PDG.G_F
+
+        self.w_min = 1
+        self.w_max = (m_B ** 2 + m_Dstar ** 2) / (2 * m_B * m_Dstar)
 
         # Variables which are often used and can be computed once
         self.r = self.m_Dstar / self.m_B
@@ -73,7 +76,14 @@ class BToDstar:
     def R2(self, w: float) -> float:
         pass
 
-    def dGamma_dw_dcosLepton_dcosNeutrino_dChi(self, w, cos_l, cos_nu, chi):
+    def dGamma_dw_dcosLepton_dcosNeutrino_dChi(self, w, cos_l, cos_nu, chi, pdg):
+        return np.where(
+            np.abs(pdg) == 22,
+            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi_gamma(w, cos_l, cos_nu, chi),
+            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi_pion(w, cos_l, cos_nu, chi)
+        )
+
+    def dGamma_dw_dcosLepton_dcosNeutrino_dChi_pion(self, w, cos_l, cos_nu, chi):
         sin_l = (1 - cos_l ** 2) ** 0.5
         sin_nu = (1 - cos_nu ** 2) ** 0.5
 
@@ -91,28 +101,46 @@ class BToDstar:
                        + 4 * sin_l * (1 + cos_l) * sin_nu * cos_nu * np.cos(chi) * Hminus * Hzero
                )
 
-    def dGamma_dw(self, w):
+    def dGamma_dw_dcosLepton_dcosNeutrino_dChi_gamma(self, w, cos_l, cos_nu, chi):
+        sin_l = (1 - cos_l ** 2) ** 0.5
+        sin_nu = (1 - cos_nu ** 2) ** 0.5
+
+        Hplus = self.Hplus(w)
+        Hminus = self.Hminus(w)
+        Hzero = self.Hzero(w)
+
+        return 6 * self.m_B * self.m_Dstar ** 2 / 8 / (4 * np.pi) ** 4 * (w ** 2 - 1) ** 0.5 * (
+                1 - 2 * w * self.r + self.r ** 2) * self.G_F ** 2 * self.V_cb ** 2 * (
+                       (1 - cos_l) ** 2 * (1 + cos_nu ** 2) * Hplus ** 2
+                       + (1 + cos_l) ** 2 * (1 + cos_nu ** 2) * Hminus ** 2
+                       + 4 * sin_l ** 2 * sin_nu ** 2 * Hzero ** 2
+                       - 2 * sin_l ** 2 * (-1) * sin_nu ** 2 * np.cos(2 * chi) * Hplus * Hminus
+                       - 4 * sin_l * (1 - cos_l) * (-1) * sin_nu * cos_nu * np.cos(chi) * Hplus * Hzero
+                       + 4 * sin_l * (1 + cos_l) * (-1) * sin_nu * cos_nu * np.cos(chi) * Hminus * Hzero
+               )
+
+    def dGamma_dw(self, w, pdg):
         return scipy.integrate.nquad(
-            lambda cosl, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi),
+            lambda cosl, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
             [[-1, 1], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
-    def dGamma_dcosLepton(self, cosl):
+    def dGamma_dcosLepton(self, cosl, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi),
-            [[1, w_max], [-1, 1], [0, 2 * np.pi]]
+            lambda w, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            [[self.w_min, self.w_max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
-    def dGamma_dcosNeutrino(self, cosnu):
+    def dGamma_dcosNeutrino(self, cosnu, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosl, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi),
-            [[1, w_max], [-1, 1], [0, 2 * np.pi]]
+            lambda w, cosl, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            [[self.w_min, self.w_max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
-    def dGamma_dchi(self, chi):
+    def dGamma_dchi(self, chi, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosl, cosnu: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi),
-            [[1, w_max], [-1, 1], [-1, 1]]
+            lambda w, cosl, cosnu: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            [[self.w_min, self.w_max], [-1, 1], [-1, 1]]
         )[0]
 
     def Gamma(self):
@@ -127,10 +155,10 @@ class BToDstar:
         )[0]
 
 
-class BToDstarCLN(BToDstar):
+class BToDstarLNuCLN(BToDstarLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
-        super(BToDstarCLN, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+        super(BToDstarLNuCLN, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # CLN specifics, default is given by values in https://arxiv.org/abs/1702.01521v2
         self.h_A1_1 = 0.906
@@ -152,11 +180,11 @@ class BToDstarCLN(BToDstar):
         return self.R2_1 + 0.11 * (w - 1) - 0.06 * (w - 1) ** 2
 
 
-class BToDstarBGL(BToDstar):
+class BToDstarLNuBGL(BToDstarLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066,
                  exp_coeff=(3.79139e-04, 2.69537e-02, 5.49846e-04, -2.04028e-03, -4.32818e-04, 5.35029e-03)):
-        super(BToDstarBGL, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+        super(BToDstarLNuBGL, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # BGL specifics, default is given in arXiv:1703.08170v2
         self.chiT_plus33 = 5.28e-4  # GeV^-2
@@ -175,6 +203,7 @@ class BToDstarBGL(BToDstar):
         assert sum([a ** 2 for a in self.expansion_coefficients_a]) <= 1, "Unitarity bound violated."
         assert sum([b ** 2 + c ** 2 for b, c in zip(self.expansion_coefficients_b,
                                                     self.expansion_coefficients_c)]) <= 1, "Unitarity bound violated."
+
         self._gamma_int = self._Gamma()
 
     def h_A1(self, w):
@@ -229,13 +258,8 @@ class BToDstarBGL(BToDstar):
 
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-    from eFFORT.plotting import Tango, init_thesis_plot_style
-
-    init_thesis_plot_style()
-
-    bToDstar_CLN = BToDstarCLN(PDG.m_Bplus, PDG.m_Dstarzero, 37.4e-3)
-    bToDstar_BGL = BToDstarBGL(PDG.m_Bplus, PDG.m_Dstarzero, 41.6558e-3)
+    bToDstar_CLN = BToDstarLNuCLN(PDG.m_Bplus, PDG.m_Dstarzero, 37.4e-3)
+    bToDstar_BGL = BToDstarLNuBGL(PDG.m_Bplus, PDG.m_Dstarzero, 41.6558e-3)
 
     w_min = 1
     w_max = (bToDstar_CLN.m_B ** 2 + bToDstar_CLN.m_Dstar ** 2) / (2 * bToDstar_CLN.m_B * bToDstar_CLN.m_Dstar)
@@ -244,69 +268,10 @@ if __name__ == '__main__':
     cosl_range = np.linspace(-1, 1, endpoint=True)
     cosnu_range = np.linspace(-1, 1, endpoint=True)
     chi_range = np.linspace(0, 2 * np.pi, endpoint=True)
+    pdg_codes = np.random.choice([22, 111, 211], len(w_range))
 
     # Example call with numpy arrays
-    print(bToDstar_BGL.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w_range, cosl_range, cosnu_range, chi_range))
+    print(bToDstar_BGL.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w_range, cosl_range, cosnu_range, chi_range, pdg_codes))
 
-    plt.plot(w_range, [bToDstar_CLN.dGamma_dw(x) * 1e15 for x in w_range],
-             color=Tango.slate, ls='solid', lw=2, label='CLN arXiv:1702.01521v2')
-    plt.plot(w_range, [bToDstar_BGL.dGamma_dw(x) * 1e15 for x in w_range],
-             color=Tango.orange, ls='dotted', lw=2, label='BGL arXiv:1703.08170v2')
-    plt.xlabel(r'$w$')
-    plt.ylabel(r'$\mathrm{d}\Gamma / \mathrm{d}w \cdot 10^{-15}$')
-    plt.title(r'$B \rightarrow D^* l \nu$')
-    plt.legend(prop={'size': 12})
-    plt.xlim(w_min, w_max)
-    plt.ylim(0, 80)
-    plt.tight_layout()
-    plt.savefig('BToDstar_dGamma_dw.png')
-    plt.show()
-    plt.close()
-
-    plt.plot(chi_range, [bToDstar_CLN.dGamma_dchi(x) * 1e15 for x in chi_range],
-             color=Tango.slate, ls='solid', lw=2, label='CLN arXiv:1702.01521v2')
-    plt.plot(chi_range, [bToDstar_BGL.dGamma_dchi(x) * 1e15 for x in chi_range],
-             color=Tango.orange, ls='dotted', lw=2, label='BGL arXiv:1703.08170v2')
-    plt.xlabel(r'$\chi$')
-    plt.ylabel(r'$\mathrm{d}\Gamma / \mathrm{d}\chi \cdot 10^{-15}$')
-    plt.title(r'$B \rightarrow D^* l \nu$')
-    plt.legend(prop={'size': 12})
-    plt.xlim(0, 2 * np.pi)
-    plt.ylim(0, 6)
-    plt.tight_layout()
-    plt.savefig('BToDstar_dGamma_dchi.png')
-    plt.show()
-    plt.close()
-
-    plt.plot(cosl_range, [bToDstar_CLN.dGamma_dcosLepton(x) * 1e15 for x in cosl_range],
-             color=Tango.slate, ls='solid', lw=2, label='CLN arXiv:1702.01521v2')
-    plt.plot(cosl_range, [bToDstar_BGL.dGamma_dcosLepton(x) * 1e15 for x in cosl_range],
-             color=Tango.orange, ls='dotted', lw=2, label='BGL arXiv:1703.08170v2')
-    plt.xlabel(r'$\cos\theta_l$')
-    plt.ylabel(r'$\mathrm{d}\Gamma / \mathrm{d}\cos\theta_l \cdot 10^{-15}$')
-    plt.title(r'$B \rightarrow D^* l \nu$')
-    plt.legend(prop={'size': 12})
-    plt.xlim(-1, 1)
-    plt.ylim(0, 23)
-    plt.tight_layout()
-    plt.savefig('BToDstar_dGamma_dcosl.png')
-    plt.show()
-    plt.close()
-
-    plt.plot(cosnu_range, [bToDstar_CLN.dGamma_dcosNeutrino(x) * 1e15 for x in cosnu_range],
-             color=Tango.slate, ls='solid', lw=2, label='CLN arXiv:1702.01521v2')
-    plt.plot(cosnu_range, [bToDstar_BGL.dGamma_dcosNeutrino(x) * 1e15 for x in cosnu_range],
-             color=Tango.orange, ls='dotted', lw=2, label='BGL arXiv:1703.08170v2')
-    plt.xlabel(r'$\cos\theta_\nu$')
-    plt.ylabel(r'$\mathrm{d}\Gamma / \mathrm{d}\cos\theta_\nu \cdot 10^{-15}$')
-    plt.title(r'$B \rightarrow D^* l \nu$')
-    plt.legend(prop={'size': 12})
-    plt.xlim(-1, 1)
-    plt.ylim(0, 21)
-    plt.tight_layout()
-    plt.savefig('BToDstar_dGamma_dcosnu.png')
-    plt.show()
-    plt.close()
-
-    print("CLN total rate: {}".format(bToDstar_CLN.Gamma()))
-    print("BGL total rate: {}".format(bToDstar_BGL.Gamma()))
+    # print("CLN total rate: {}".format(bToDstar_CLN.Gamma()))
+    # print("BGL total rate: {}".format(bToDstar_BGL.Gamma()))

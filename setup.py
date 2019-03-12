@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='eFFORT',
-    version='v.0.1.0',
+    version='v.0.1.1',
     packages=['eFFORT'],
     url='https://gitlab.ekp.kit.edu/mapr/eFFORT',
     license='',
