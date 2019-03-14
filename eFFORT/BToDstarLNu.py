@@ -151,14 +151,15 @@ class BToDstarLNu:
         w_max = (self.m_B ** 2 + self.m_Dstar ** 2) / (2 * self.m_B * self.m_Dstar)
         return scipy.integrate.nquad(
             self.dGamma_dw_dcosLepton_dcosNeutrino_dChi,
-            [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]]
+            [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]],
+            args=(22,)
         )[0]
 
 
 class BToDstarLNuCLN(BToDstarLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
-        super(BToDstarLNuCLN, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+        super().__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # CLN specifics, default is given by values in https://arxiv.org/abs/1702.01521v2
         self.h_A1_1 = 0.906
@@ -184,7 +185,7 @@ class BToDstarLNuBGL(BToDstarLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066,
                  exp_coeff=(3.79139e-04, 2.69537e-02, 5.49846e-04, -2.04028e-03, -4.32818e-04, 5.35029e-03)):
-        super(BToDstarLNuBGL, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+        super().__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # BGL specifics, default is given in arXiv:1703.08170v2
         self.chiT_plus33 = 5.28e-4  # GeV^-2
