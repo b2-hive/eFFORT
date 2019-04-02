@@ -27,6 +27,8 @@ class BToDLNu:
         # Variables which are often used and can be computed once
         self.r = self.m_D / self.m_B
 
+        self._gamma_int = self._Gamma()
+
     @abc.abstractmethod
     def G(self, w: float) -> float:
         pass
@@ -39,11 +41,14 @@ class BToDLNu:
         return self.G_F ** 2 * m_D ** 3 / 48 / np.pi ** 3 * (m_B + m_D) ** 2 * (w ** 2 - 1) ** (
                 3 / 2) * self.eta_EW ** 2 * self.V_cb ** 2 * self.G(w)
 
-    @functools.lru_cache(maxsize=1)
-    def Gamma(self):
+    
+    def _Gamma(self):
         w_min = 1
         w_max = (self.m_B ** 2 + self.m_D ** 2) / (2 * self.m_B * self.m_D)
         return scipy.integrate.quad(self.dGamma_dw, w_min, w_max)[0]
+
+    def Gamma(self):
+        return self._gamma_int
 
 
 class BToDLNuCLN(BToDLNu):
