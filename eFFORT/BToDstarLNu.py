@@ -31,7 +31,12 @@ class BToDstarLNu:
         self.r = self.m_Dstar / self.m_B
         self.rprime = 2 * np.sqrt(self.m_B * self.m_Dstar) / (self.m_B + self.m_Dstar)
 
-        self._gamma_int = None
+        self._gamma_int = {
+            22: None,
+            111: None,
+            211: None,
+        }
+
 
     def A0(self, w):
         raise RuntimeError("Not implemented. But also not required for light leptons.")
@@ -143,16 +148,16 @@ class BToDstarLNu:
             [[self.w_min, self.w_max], [-1, 1], [-1, 1]]
         )[0]
 
-    def Gamma(self):
-        return self._gamma_int
+    def Gamma(self, pdg):
+        return self._gamma_int[np.abs(pdg)]
 
-    def _Gamma(self):
+    def _Gamma(self, pdg):
         w_min = 1
         w_max = (self.m_B ** 2 + self.m_Dstar ** 2) / (2 * self.m_B * self.m_Dstar)
         return scipy.integrate.nquad(
             self.dGamma_dw_dcosLepton_dcosNeutrino_dChi,
             [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]],
-            args=(22,)
+            args=(pdg,)
         )[0]
 
 
@@ -167,7 +172,9 @@ class BToDstarLNuCLN(BToDstarLNu):
         self.R1_1 = 1.38
         self.R2_1 = 0.97
 
-        self._gamma_int = self._Gamma()
+        self._gamma_int[22] = self._Gamma(22)
+        self._gamma_int[111] = self._Gamma(111)
+        self._gamma_int[211] = self._gamma_int[111]
 
     def h_A1(self, w):
         rho2 = self.rho2
@@ -205,7 +212,9 @@ class BToDstarLNuBGL(BToDstarLNu):
         assert sum([b ** 2 + c ** 2 for b, c in zip(self.expansion_coefficients_b,
                                                     self.expansion_coefficients_c)]) <= 1, "Unitarity bound violated."
 
-        self._gamma_int = self._Gamma()
+        self._gamma_int[22] = self._Gamma(22)
+        self._gamma_int[111] = self._Gamma(111)
+        self._gamma_int[211] = self._gamma_int[111]
 
     def h_A1(self, w):
         z = z_var(w)
