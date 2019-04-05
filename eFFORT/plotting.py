@@ -1,4 +1,5 @@
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 
 class Tango:
@@ -64,3 +65,12 @@ def init_thesis_plot_style():
 
     for key in my_rc_params.keys():
         mpl.rcParams[key] = my_rc_params[key]
+
+
+def plot_with_errorband(x_values, y_values, label=None, ls=None):
+    plt.plot(x_values, [y.nominal_value for y in y_values], label=label, ls=ls)
+    plt.fill_between(x_values,
+                     [y.nominal_value + y.std_dev for y in y_values],
+                     [y.nominal_value - y.std_dev for y in y_values],
+                     alpha=0.3
+                     )
