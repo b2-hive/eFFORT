@@ -9,5 +9,5 @@ setup(
     author='Markus Prim',
     author_email='markus.prim@kit.edu',
     description='A tool for convenient reweighting between different form factors of semileptonic B decays.',
-    install_requires=['numpy', 'scipy', 'matplotlib'],
+    install_requires=['numpy', 'scipy', 'matplotlib', 'tabulate', 'uncertainties', 'numdifftools'],
 )

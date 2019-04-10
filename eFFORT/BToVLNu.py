@@ -18,7 +18,7 @@ class BToVLNu:
         self.m_B = m_B
         self.m_V = m_V
         self.m_L = m_L
-        self.V_ub = V_ub
+        self._V_ub = V_ub
         self.eta_EW = eta_EW
 
         self.N0 = PDG.G_F ** 2 / (192. * np.pi ** 3 * self.m_B ** 3)  # Save some computing time.
@@ -33,6 +33,15 @@ class BToVLNu:
         self.q2max -= 1e-3  # numerical stability
 
         self.gamma = None
+
+    @property
+    def V_ub(self):
+        return self._V_ub
+
+    @V_ub.setter
+    def V_ub(self, V_ub):
+        self._V_ub = V_ub
+        self.gamma = None  # Clear cache of normalization integral when updating Vub
 
     def kaellen(self, q2):
         return ((self.m_B + self.m_V) ** 2 - q2) * ((self.m_B - self.m_V) ** 2 - q2)
@@ -75,7 +84,11 @@ class BToVLNu:
                 self.Hplus(q2) ** 2 + self.Hminus(q2) ** 2 + self.Hzero(q2) ** 2)
 
     def deltaGamma_deltaq2(self, lower, upper):
-        return scipy.integrate.quad(self.dGamma_dq2, lower, upper)[0]
+        if lower < self.q2min:
+            lower = self.q2min
+        if upper > self.q2max:
+            upper = self.q2max
+        return scipy.integrate.quad(self.dGamma_dq2, lower, upper, epsabs=1e-20)[0] / (upper - lower)
 
     def Gamma(self):
         if self.gamma is None:
@@ -87,10 +100,15 @@ class BToVLNuBCL(BToVLNu):
 
     def __init__(self, m_B: float, m_V: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
         super(BToVLNuBCL, self).__init__(m_B, m_V, m_L, V_ub, eta_EW)
-        self.coefficients = None
+        self._coefficients = None
 
-    def set_bcl_coefficients(self, coefficients):
-        self.coefficients = coefficients
+    @property
+    def coefficients(self):
+        return self._coefficients
+
+    @coefficients.setter
+    def coefficients(self, coefficients):
+        self._coefficients = coefficients
         self.gamma = None  # Clear cache of normalization integral when updating coefficients
 
     def form_factor(self, q2, m_pole, coefficients):
@@ -171,10 +189,10 @@ if __name__ == '__main__':
     lcsr_Bomega_correlated = correlated_values(lcsr_Bomega, lcsr_Bomega_cov)
 
     bcl_rho = BToVLNuBCL(m_B=PDG.m_Bzero, m_V=0.775, m_L=0, V_ub=3.72e-3)
-    bcl_rho.set_bcl_coefficients(lcsr_Brho_correlated)
+    bcl_rho.coefficients = lcsr_Brho_correlated
 
     bcl_omega = BToVLNuBCL(m_B=PDG.m_Bzero, m_V=0.782, m_L=0, V_ub=3.72e-3)
-    bcl_omega.set_bcl_coefficients(lcsr_Bomega_correlated)
+    bcl_omega.coefficients = lcsr_Bomega_correlated
 
     q2range = np.linspace(bcl_rho.q2min, bcl_rho.q2max)
 
@@ -233,10 +251,10 @@ if __name__ == '__main__':
 
 
     bcl_rho = BToVLNuBCL(m_B=PDG.m_Bzero, m_V=0.775, m_L=0, V_ub=3.72e-3)
-    bcl_rho.set_bcl_coefficients(lcsr_Brho)
+    bcl_rho.coefficients = lcsr_Brho
 
     bcl_omega = BToVLNuBCL(m_B=PDG.m_Bzero, m_V=0.782, m_L=0, V_ub=3.72e-3)
-    bcl_omega.set_bcl_coefficients(lcsr_Bomega)
+    bcl_omega.coefficients = lcsr_Bomega
 
     # tauBzero = 1.520e-12 * 1. / 6.582119e-16 / 1e-9
     # tauBplus = 1.638e-12 * 1. / 6.582119e-16 / 1e-9
