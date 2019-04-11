@@ -148,7 +148,11 @@ class BToDstarLNu:
         )[0]
 
     def Gamma(self, pdg):
-        return self._gamma_int[np.abs(pdg)]
+        gamma = np.full(len(pdg), np.nan)
+        for pdg_code in self._gamma_int.keys():
+            gamma[abs(pdg) == pdg_code] = self._gamma_int[pdg_code]
+        assert not np.isnan(gamma).any()
+        return gamma
 
     def _Gamma(self, pdg):
         w_min = 1
