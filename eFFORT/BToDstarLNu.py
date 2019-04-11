@@ -37,7 +37,6 @@ class BToDstarLNu:
             211: None,
         }
 
-
     def A0(self, w):
         raise RuntimeError("Not implemented. But also not required for light leptons.")
 
@@ -243,7 +242,7 @@ class BToDstarLNuBGL(BToDstarLNu):
     def blaschke_factor(self, z, poles):
         return np.multiply.reduce([(z - self.z_p(m_pole)) / (1 - z * self.z_p(m_pole)) for m_pole in poles])
 
-    @functools.lru_cache(2**10)
+    @functools.lru_cache(2 ** 10)
     def z_p(self, m_pole):
         m_B = self.m_B
         m_D = self.m_Dstar
