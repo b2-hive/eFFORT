@@ -48,7 +48,7 @@ class BToVLNu:
 
     @abc.abstractmethod
     def A0(self, q2):
-        raise RuntimeError("Not implemented. But also not required for light leptons.")
+        return 0
 
     @abc.abstractmethod
     def A1(self, q2):
@@ -79,9 +79,14 @@ class BToVLNu:
     def Hzero(self, q2):
         return 8 * self.m_B * self.m_V / q2 ** 0.5 * self.A12(q2)
 
+    def Hscalar(self, q2):
+        return self.kaellen(q2)**0.5 / q2**0.5 * self.A0(q2)
+
     def dGamma_dq2(self, q2):
-        return self.N0 * self.V_ub ** 2 * self.kaellen(q2)**0.5 * q2 * (
-                self.Hplus(q2) ** 2 + self.Hminus(q2) ** 2 + self.Hzero(q2) ** 2)
+        return self.N0 * self.V_ub ** 2 * self.kaellen(q2)**0.5 * q2 * (1 - self.m_L**2 / q2) ** 2 * (
+            (1 + self.m_L**2 / (2 * q2)) * (self.Hplus(q2) ** 2 + self.Hminus(q2) ** 2 + self.Hzero(q2) ** 2)
+            + (3 * self.m_L**2 / (2 * q2) * self.Hscalar(q2) ** 2)
+        )
 
     def deltaGamma_deltaq2(self, lower, upper):
         if lower < self.q2min:
@@ -114,6 +119,13 @@ class BToVLNuBCL(BToVLNu):
     def form_factor(self, q2, m_pole, coefficients):
         return BToVLNu.blaschke_pole(q2, m_pole) * sum(
             [par * (self.z(q2) - self.z(0)) ** k for k, par in enumerate(coefficients)])
+
+    def A0(self, q2):
+        m_pole = 5.279
+        coefficients = [8 * self.m_B * self.m_V / (self.m_B ** 2 - self.m_V ** 2) * self.coefficients[5],
+                        self.coefficients[0], self.coefficients[1]]
+
+        return self.form_factor(q2, m_pole, coefficients)
 
     def A1(self, q2):
         m_pole = 5.724
