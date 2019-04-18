@@ -2,6 +2,7 @@ import abc
 import numpy as np
 from eFFORT.utility import PDG
 import scipy.integrate
+import uncertainties
 
 
 class BToVLNu:
@@ -83,21 +84,28 @@ class BToVLNu:
         return self.kaellen(q2)**0.5 / q2**0.5 * self.A0(q2)
 
     def dGamma_dq2(self, q2):
-        return self.N0 * self.V_ub ** 2 * self.kaellen(q2)**0.5 * q2 * (1 - self.m_L**2 / q2) ** 2 * (
-            (1 + self.m_L**2 / (2 * q2)) * (self.Hplus(q2) ** 2 + self.Hminus(q2) ** 2 + self.Hzero(q2) ** 2)
-            + (3 * self.m_L**2 / (2 * q2) * self.Hscalar(q2) ** 2)
-        )
+        try:
+            return self.N0 * self.V_ub ** 2 * self.kaellen(q2)**0.5 * q2 * (1 - self.m_L**2 / q2) ** 2 * (
+                (1 + self.m_L**2 / (2 * q2)) * (self.Hplus(q2) ** 2 + self.Hminus(q2) ** 2 + self.Hzero(q2) ** 2)
+                + (3 * self.m_L**2 / (2 * q2) * self.Hscalar(q2) ** 2)
+            )
+        except TypeError:
+            return 0
+        except ZeroDivisionError:
+            return 0
 
     def deltaGamma_deltaq2(self, lower, upper):
         if lower < self.q2min:
             lower = self.q2min
         if upper > self.q2max:
             upper = self.q2max
-        return scipy.integrate.quad(self.dGamma_dq2, lower, upper, epsabs=1e-20)[0] / (upper - lower)
+        return scipy.integrate.quad(lambda x: uncertainties.nominal_value(self.dGamma_dq2(x)),
+                                    lower, upper, epsabs=1e-20)[0] / (upper - lower)
 
     def Gamma(self):
         if self.gamma is None:
             self.gamma = self.deltaGamma_deltaq2(self.q2min, self.q2max)
+            self.gamma *= (self.q2max - self.q2min)  # Total rate should not be divided by bin width
         return self.gamma
 
 
