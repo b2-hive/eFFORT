@@ -163,10 +163,28 @@ class BToDstarLNu:
             args=(pdg,)
         )[0]
 
+    def get_gammas(self):
+        return self._gamma_int
+
+    @staticmethod
+    def check_precomputed_gammas_dict(gammas_dict):
+        if not isinstance(gammas_dict, dict):
+            raise ValueError(
+                f"The parameter cached_gammas must be a dictionary containing precomputed integral values.\n"
+                f"The provided cached_gammas was of the type {type(gammas_dict)}."
+            )
+        if not len(gammas_dict) == 3 or not all(k in gammas_dict.keys() for k in [22, 111, 211]):
+            raise KeyError(
+                f"The provided cached_gammas dictionary must contain values for the three keys 22, 111 and 211.\n"
+                f"It contained the {len(gammas_dict)} keys {list(gammas_dict.keys())}."
+            )
+        if not all(isinstance(v, float) for v in gammas_dict.values()):
+            raise ValueError(f"The provided cached_gamas dictionary must contain floats as values.")
+
 
 class BToDstarLNuCLN(BToDstarLNu):
 
-    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066, cached_gammas=None):
         super().__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # CLN specifics, default is given by values in https://arxiv.org/abs/1702.01521v2
@@ -175,9 +193,13 @@ class BToDstarLNuCLN(BToDstarLNu):
         self.R1_1 = 1.38
         self.R2_1 = 0.97
 
-        self._gamma_int[22] = self._Gamma(22)
-        self._gamma_int[111] = self._Gamma(111)
-        self._gamma_int[211] = self._gamma_int[111]
+        if cached_gammas is None:
+            self._gamma_int[22] = self._Gamma(22)
+            self._gamma_int[111] = self._Gamma(111)
+            self._gamma_int[211] = self._gamma_int[111]
+        else:
+            self.check_precomputed_gammas_dict(cached_gammas)
+            self._gamma_int = cached_gammas
 
     def h_A1(self, w):
         rho2 = self.rho2
@@ -193,7 +215,7 @@ class BToDstarLNuCLN(BToDstarLNu):
 
 class BToDstarLNuBGL(BToDstarLNu):
 
-    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066,
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066, cached_gammas=None,
                  exp_coeff=(3.79139e-04, 2.69537e-02, 5.49846e-04, -2.04028e-03, -4.32818e-04, 5.35029e-03)):
         super().__init__(m_B, m_Dstar, V_cb, eta_EW)
 
@@ -214,10 +236,13 @@ class BToDstarLNuBGL(BToDstarLNu):
         assert sum([a ** 2 for a in self.expansion_coefficients_a]) <= 1, "Unitarity bound violated."
         assert sum([b ** 2 + c ** 2 for b, c in zip(self.expansion_coefficients_b,
                                                     self.expansion_coefficients_c)]) <= 1, "Unitarity bound violated."
-
-        self._gamma_int[22] = self._Gamma(22)
-        self._gamma_int[111] = self._Gamma(111)
-        self._gamma_int[211] = self._gamma_int[111]
+        if cached_gammas is None:
+            self._gamma_int[22] = self._Gamma(22)
+            self._gamma_int[111] = self._Gamma(111)
+            self._gamma_int[211] = self._gamma_int[111]
+        else:
+            self.check_precomputed_gammas_dict(cached_gammas)
+            self._gamma_int = cached_gammas
 
     def h_A1(self, w):
         z = z_var(w)
