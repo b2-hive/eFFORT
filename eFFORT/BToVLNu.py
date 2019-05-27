@@ -153,6 +153,24 @@ class BToVLNuBCL(BToVLNu):
 
         return self.form_factor(q2, m_pole, coefficients)
 
+    def T1(self, q2):
+        m_pole = 5.325
+        coefficients = [self.coefficients[11], self.coefficients[12], self.coefficients[13]]
+
+        return self.form_factor(q2, m_pole, coefficients)
+
+    def T2(self, q2):
+        m_pole = 5.724
+        coefficients = [self.coefficients[11], self.coefficients[14], self.coefficients[15]]
+
+        return self.form_factor(q2, m_pole, coefficients)
+
+    def T23(self, q2):
+        m_pole = 5.724
+        coefficients = [self.coefficients[16], self.coefficients[17], self.coefficients[18]]
+
+        return self.form_factor(q2, m_pole, coefficients)
+
 
 if __name__ == '__main__':
 
