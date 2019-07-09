@@ -4,6 +4,8 @@ from eFFORT.utility import PDG
 import scipy.integrate
 import uncertainties
 
+from eFFORT.BRhoLepNuRateExp import getDiffRatedq2
+
 
 class BToVLNu:
     """
@@ -128,6 +130,14 @@ class BToVLNuBCL(BToVLNu):
         return BToVLNu.blaschke_pole(q2, m_pole) * sum(
             [par * (self.z(q2) - self.z(0)) ** k for k, par in enumerate(coefficients)])
 
+    def AP(self, q2):
+        """Form factor under equations of motion."""
+        # AP = -2 Mr / (m_b + m_u)  A0
+        lambdaBar = 0.5
+        m_b = self.m_B - lambdaBar
+        m_u = 0
+        return -2 * self.m_V / (m_b + m_u) * self.A0(q2)
+
     def A0(self, q2):
         m_pole = 5.279
         coefficients = [8 * self.m_B * self.m_V / (self.m_B ** 2 - self.m_V ** 2) * self.coefficients[5],
@@ -170,6 +180,14 @@ class BToVLNuBCL(BToVLNu):
         coefficients = [self.coefficients[16], self.coefficients[17], self.coefficients[18]]
 
         return self.form_factor(q2, m_pole, coefficients)
+
+    def dGamma_dq2_NP(self, q2, WCs=None):
+        if WCs is None:
+            WCs = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        FFs = [self.AP(q2), self.V(q2), self.A0(q2), self.A1(q2), self.A12(q2), self.T1(q2), self.T2(q2), self.T23(q2)]
+        glebsch_gordan_fix = 0.5
+        return self._V_ub**2 * glebsch_gordan_fix * getDiffRatedq2(self.m_B, self.m_V, self.m_L, q2, WCs, FFs)
 
 
 if __name__ == '__main__':
