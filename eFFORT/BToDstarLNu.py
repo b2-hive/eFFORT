@@ -174,6 +174,29 @@ class BToDstarLNuCLN(BToDstarLNu):
         return self.R2_1 + 0.11 * (w - 1) - 0.06 * (w - 1) ** 2
 
 
+class BToDstarLNuBelle(BToDstarLNu):
+
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
+        super(BToDstarLNuBelle, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+
+        # CLN specifics, default is given by values in https://arxiv.org/abs/1702.01521v2
+        self.h_A1_1 = 0.906
+        self.rho2 = 1.3
+        self.R1_1 = 1.18
+        self.R2_1 = 0.71
+
+    def h_A1(self, w):
+        rho2 = self.rho2
+        _z = z_var(w)
+        return self.h_A1_1 * (1 - 8 * rho2 * _z + (53 * rho2 - 15) * _z ** 2 - (231 * rho2 - 91) * _z ** 3)
+
+    def R1(self, w):
+        return self.R1_1 - 0.12 * (w - 1) + 0.05 * (w - 1) ** 2
+
+    def R2(self, w):
+        return self.R2_1 + 0.11 * (w - 1) - 0.06 * (w - 1) ** 2
+
+
 class BToDstarLNuBGL(BToDstarLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):

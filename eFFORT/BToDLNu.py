@@ -66,6 +66,26 @@ class BToDLNuCLN(BToDLNu):
         return (self.G_1 * (1 - 8 * rho2 * z + (51 * rho2 - 10) * z ** 2 - (252 * rho2 - 84) * z ** 3)) ** 2
 
 
+class BToDLNuBelle(BToDLNu):
+
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066, cln_g1=None, cln_rho2=None):
+        super(BToDLNuBelle, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+
+        # CLN specifics, default is given by the Belle Evtgen parameters
+        self.G_1 = 1.074 if cln_g1 is None else cln_g1
+        self.rho2 = 1.15 if cln_rho2 is None else cln_rho2
+
+    def G(self, w: float) -> float:
+        """
+        Squared Caprini, Lellouch and Neubert (CLN) form factor.
+        :param z:
+        :return:
+        """
+        rho2 = self.rho2
+        z = z_var(w)
+        return (self.G_1 * (1 - 8 * rho2 * z + (51 * rho2 - 10) * z ** 2 - (252 * rho2 - 84) * z ** 3)) ** 2
+
+
 class BToDLNuBGL(BToDLNu):
 
     def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066, bgl_fplus_coefficients=None):
