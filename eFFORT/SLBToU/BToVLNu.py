@@ -4,7 +4,7 @@ import numpy as np
 import scipy.integrate
 import uncertainties
 
-from eFFORT.BRhoLepNuRateExp import getDiffRatedq2
+from eFFORT.SLBToU.BRhoLepNuRateExp import getDiffRatedq2
 from eFFORT.utility import PDG
 
 

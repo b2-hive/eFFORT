@@ -1,6 +1,6 @@
 from eFFORT.utility import PDG
-from eFFORT.BToDLNu import BToDLNuCLN, BToDLNuBGL
-from eFFORT.BToDstarLNu import BToDstarLNuCLN, BToDstarLNuBGL
+from eFFORT.SLBToC.BToDLNu import BToDLNuCLN, BToDLNuBGL
+from eFFORT.SLBToC.BToDstarLNu import BToDstarLNuCLN, BToDstarLNuBGL
 import numpy as np
 
 
