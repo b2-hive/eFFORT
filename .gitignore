@@ -1,0 +1,10 @@
+# Editor configuration #
+# #################### #
+.idea
+.vscode
+
+# Project Egg Info #
+# ################ #
+eFFORT.egg-info
+eFFORT/__pycache__/
+

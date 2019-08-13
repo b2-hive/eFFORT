@@ -1,8 +1,10 @@
+import abc
+import functools
+
 import numpy as np
 import scipy.integrate
+
 from eFFORT.utility import BGL_form_factor, z_var, PDG
-import functools
-import abc
 
 
 class BToDstarLNu:
@@ -30,6 +32,12 @@ class BToDstarLNu:
         # Variables which are often used and can be computed once
         self.r = self.m_Dstar / self.m_B
         self.rprime = 2 * np.sqrt(self.m_B * self.m_Dstar) / (self.m_B + self.m_Dstar)
+
+        self._gamma_int = {
+            22: None,
+            111: None,
+            211: None,
+        }
 
     def A0(self, w):
         raise RuntimeError("Not implemented. But also not required for light leptons.")
@@ -141,26 +149,59 @@ class BToDstarLNu:
             [[self.w_min, self.w_max], [-1, 1], [-1, 1]]
         )[0]
 
-    @functools.lru_cache(maxsize=1)
-    def Gamma(self):
+    def Gamma(self, pdg):
+        gamma = np.full(len(pdg), np.nan)
+        for pdg_code in self._gamma_int.keys():
+            gamma[abs(pdg) == pdg_code] = self._gamma_int[pdg_code]
+        assert not np.isnan(gamma).any()
+        return gamma
+
+    def _Gamma(self, pdg):
         w_min = 1
         w_max = (self.m_B ** 2 + self.m_Dstar ** 2) / (2 * self.m_B * self.m_Dstar)
         return scipy.integrate.nquad(
             self.dGamma_dw_dcosL_dcosV_dChi,
-            [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]]
+            [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]],
+            args=(pdg,)
         )[0]
+
+    def get_gammas(self):
+        return self._gamma_int
+
+    @staticmethod
+    def check_precomputed_gammas_dict(gammas_dict):
+        if not isinstance(gammas_dict, dict):
+            raise ValueError(
+                f"The parameter cached_gammas must be a dictionary containing precomputed integral values.\n"
+                f"The provided cached_gammas was of the type {type(gammas_dict)}."
+            )
+        if not len(gammas_dict) == 3 or not all(k in gammas_dict.keys() for k in [22, 111, 211]):
+            raise KeyError(
+                f"The provided cached_gammas dictionary must contain values for the three keys 22, 111 and 211.\n"
+                f"It contained the {len(gammas_dict)} keys {list(gammas_dict.keys())}."
+            )
+        if not all(isinstance(v, float) for v in gammas_dict.values()):
+            raise ValueError(f"The provided cached_gamas dictionary must contain floats as values.")
 
 
 class BToDstarLNuCLN(BToDstarLNu):
 
-    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
-        super(BToDstarLNuCLN, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066, cached_gammas=None):
+        super().__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # CLN specifics, default is given by values in https://arxiv.org/abs/1702.01521v2
         self.h_A1_1 = 0.906
         self.rho2 = 1.03
         self.R1_1 = 1.38
         self.R2_1 = 0.97
+
+        if cached_gammas is None:
+            self._gamma_int[22] = self._Gamma(22)
+            self._gamma_int[111] = self._Gamma(111)
+            self._gamma_int[211] = self._gamma_int[111]
+        else:
+            self.check_precomputed_gammas_dict(cached_gammas)
+            self._gamma_int = cached_gammas
 
     def h_A1(self, w):
         rho2 = self.rho2
@@ -199,8 +240,9 @@ class BToDstarLNuBelle(BToDstarLNu):
 
 class BToDstarLNuBGL(BToDstarLNu):
 
-    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
-        super(BToDstarLNuBGL, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066, cached_gammas=None,
+                 exp_coeff=(3.79139e-04, 2.69537e-02, 5.49846e-04, -2.04028e-03, -4.32818e-04, 5.35029e-03)):
+        super().__init__(m_B, m_Dstar, V_cb, eta_EW)
 
         # BGL specifics, default is given in arXiv:1703.08170v2
         self.chiT_plus33 = 5.28e-4  # GeV^-2
@@ -210,15 +252,22 @@ class BToDstarLNuBGL(BToDstarLNu):
         self.vector_poles = [6.337, 6.899, 7.012, 7.280]
         # Coefficients from Florian
         self.eta_ew_Vcb = self.eta_EW * self.V_cb
-        self.expansion_coefficients_a = [3.79139e-04 / self.eta_ew_Vcb, 2.69537e-02 / self.eta_ew_Vcb]  # FF g
-        self.expansion_coefficients_b = [5.49846e-04 / self.eta_ew_Vcb, -2.04028e-03 / self.eta_ew_Vcb]  # FF f
+        self.expansion_coefficients_a = [exp_coeff[0] / self.eta_ew_Vcb, exp_coeff[1] / self.eta_ew_Vcb]  # FF g
+        self.expansion_coefficients_b = [exp_coeff[2] / self.eta_ew_Vcb, exp_coeff[3] / self.eta_ew_Vcb]  # FF f
         self.expansion_coefficients_c = [
             ((self.m_B - self.m_Dstar) * self.phi_F1(0) / self.phi_f(0)) * self.expansion_coefficients_b[0],
-            -4.32818e-04 / self.eta_ew_Vcb, 5.35029e-03 / self.eta_ew_Vcb]  # FF F1
+            exp_coeff[4] / self.eta_ew_Vcb, exp_coeff[5] / self.eta_ew_Vcb]  # FF F1
 
         assert sum([a ** 2 for a in self.expansion_coefficients_a]) <= 1, "Unitarity bound violated."
         assert sum([b ** 2 + c ** 2 for b, c in zip(self.expansion_coefficients_b,
                                                     self.expansion_coefficients_c)]) <= 1, "Unitarity bound violated."
+        if cached_gammas is None:
+            self._gamma_int[22] = self._Gamma(22)
+            self._gamma_int[111] = self._Gamma(111)
+            self._gamma_int[211] = self._gamma_int[111]
+        else:
+            self.check_precomputed_gammas_dict(cached_gammas)
+            self._gamma_int = cached_gammas
 
     def h_A1(self, w):
         z = z_var(w)
@@ -247,6 +296,7 @@ class BToDstarLNuBGL(BToDstarLNu):
     def blaschke_factor(self, z, poles):
         return np.multiply.reduce([(z - self.z_p(m_pole)) / (1 - z * self.z_p(m_pole)) for m_pole in poles])
 
+    @functools.lru_cache(2 ** 10)
     def z_p(self, m_pole):
         m_B = self.m_B
         m_D = self.m_Dstar
