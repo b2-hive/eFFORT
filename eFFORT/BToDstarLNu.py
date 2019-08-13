@@ -1,8 +1,10 @@
+import abc
+import functools
+
 import numpy as np
 import scipy.integrate
+
 from eFFORT.utility import BGL_form_factor, z_var, PDG
-import functools
-import abc
 
 
 class BToDstarLNu:
@@ -80,14 +82,14 @@ class BToDstarLNu:
     def R2(self, w: float) -> float:
         pass
 
-    def dGamma_dw_dcosLepton_dcosNeutrino_dChi(self, w, cos_l, cos_nu, chi, pdg):
+    def dGamma_dw_dcosL_dcosV_dChi(self, w, cos_l, cos_nu, chi, pdg):
         return np.where(
             np.abs(pdg) == 22,
-            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi_gamma(w, cos_l, cos_nu, chi),
-            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi_pion(w, cos_l, cos_nu, chi)
+            self.dGamma_dw_dcosL_dcosV_dChi_gamma(w, cos_l, cos_nu, chi),
+            self.dGamma_dw_dcosL_dcosV_dChi_pion(w, cos_l, cos_nu, chi)
         )
 
-    def dGamma_dw_dcosLepton_dcosNeutrino_dChi_pion(self, w, cos_l, cos_nu, chi):
+    def dGamma_dw_dcosL_dcosV_dChi_pion(self, w, cos_l, cos_nu, chi):
         sin_l = (1 - cos_l ** 2) ** 0.5
         sin_nu = (1 - cos_nu ** 2) ** 0.5
 
@@ -105,7 +107,7 @@ class BToDstarLNu:
                        + 4 * sin_l * (1 + cos_l) * sin_nu * cos_nu * np.cos(chi) * Hminus * Hzero
                )
 
-    def dGamma_dw_dcosLepton_dcosNeutrino_dChi_gamma(self, w, cos_l, cos_nu, chi):
+    def dGamma_dw_dcosL_dcosV_dChi_gamma(self, w, cos_l, cos_nu, chi):
         sin_l = (1 - cos_l ** 2) ** 0.5
         sin_nu = (1 - cos_nu ** 2) ** 0.5
 
@@ -125,25 +127,25 @@ class BToDstarLNu:
 
     def dGamma_dw(self, w, pdg):
         return scipy.integrate.nquad(
-            lambda cosl, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda cosL, cosV, chi: self.dGamma_dw_dcosL_dcosV_dChi(w, cosL, cosV, chi, pdg),
             [[-1, 1], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dcosLepton(self, cosl, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda w, cosV, chi: self.dGamma_dw_dcosL_dcosV_dChi(w, cosl, cosV, chi, pdg),
             [[self.w_min, self.w_max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dcosNeutrino(self, cosnu, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosl, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda w, cosL, chi: self.dGamma_dw_dcosL_dcosV_dChi(w, cosL, cosnu, chi, pdg),
             [[self.w_min, self.w_max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dchi(self, chi, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosl, cosnu: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda w, cosL, cosV: self.dGamma_dw_dcosL_dcosV_dChi(w, cosL, cosV, chi, pdg),
             [[self.w_min, self.w_max], [-1, 1], [-1, 1]]
         )[0]
 
@@ -158,7 +160,7 @@ class BToDstarLNu:
         w_min = 1
         w_max = (self.m_B ** 2 + self.m_Dstar ** 2) / (2 * self.m_B * self.m_Dstar)
         return scipy.integrate.nquad(
-            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi,
+            self.dGamma_dw_dcosL_dcosV_dChi,
             [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]],
             args=(pdg,)
         )[0]
@@ -200,6 +202,29 @@ class BToDstarLNuCLN(BToDstarLNu):
         else:
             self.check_precomputed_gammas_dict(cached_gammas)
             self._gamma_int = cached_gammas
+
+    def h_A1(self, w):
+        rho2 = self.rho2
+        _z = z_var(w)
+        return self.h_A1_1 * (1 - 8 * rho2 * _z + (53 * rho2 - 15) * _z ** 2 - (231 * rho2 - 91) * _z ** 3)
+
+    def R1(self, w):
+        return self.R1_1 - 0.12 * (w - 1) + 0.05 * (w - 1) ** 2
+
+    def R2(self, w):
+        return self.R2_1 + 0.11 * (w - 1) - 0.06 * (w - 1) ** 2
+
+
+class BToDstarLNuBelle(BToDstarLNu):
+
+    def __init__(self, m_B: float, m_Dstar: float, V_cb: float, eta_EW: float = 1.0066):
+        super(BToDstarLNuBelle, self).__init__(m_B, m_Dstar, V_cb, eta_EW)
+
+        # CLN specifics, default is given by values in https://arxiv.org/abs/1702.01521v2
+        self.h_A1_1 = 0.906
+        self.rho2 = 1.3
+        self.R1_1 = 1.18
+        self.R2_1 = 0.71
 
     def h_A1(self, w):
         rho2 = self.rho2
@@ -309,7 +334,7 @@ if __name__ == '__main__':
     pdg_codes = np.random.choice([22, 111, 211], len(w_range))
 
     # Example call with numpy arrays
-    print(bToDstar_BGL.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w_range, cosl_range, cosnu_range, chi_range, pdg_codes))
+    print(bToDstar_BGL.dGamma_dw_dcosL_dcosV_dChi(w_range, cosl_range, cosnu_range, chi_range, pdg_codes))
 
     # print("CLN total rate: {}".format(bToDstar_CLN.Gamma()))
     # print("BGL total rate: {}".format(bToDstar_BGL.Gamma()))
