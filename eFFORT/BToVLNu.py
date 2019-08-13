@@ -1,10 +1,11 @@
 import abc
+
 import numpy as np
-from eFFORT.utility import PDG
 import scipy.integrate
 import uncertainties
 
 from eFFORT.BRhoLepNuRateExp import getDiffRatedq2
+from eFFORT.utility import PDG
 
 
 class BToVLNu:
@@ -28,7 +29,7 @@ class BToVLNu:
 
         self.tplus = (self.m_B + self.m_V) ** 2
         self.tminus = (self.m_B - self.m_V) ** 2
-        self.tzero = self.tplus * (1 - (1 - self.tminus / self.tplus)**0.5)
+        self.tzero = self.tplus * (1 - (1 - self.tminus / self.tplus) ** 0.5)
 
         self.q2min = self.m_L ** 2
         self.q2min += 1e-3  # numerical stability
@@ -77,19 +78,19 @@ class BToVLNu:
         return self.kaellen(q2) ** 0.5 * self.V(q2) / (self.m_B + self.m_V) + (self.m_B + self.m_V) * self.A1(q2)
 
     def Hminus(self, q2):
-        return self.kaellen(q2)**0.5 * self.V(q2) / (self.m_B + self.m_V) - (self.m_B + self.m_V) * self.A1(q2)
+        return self.kaellen(q2) ** 0.5 * self.V(q2) / (self.m_B + self.m_V) - (self.m_B + self.m_V) * self.A1(q2)
 
     def Hzero(self, q2):
         return 8 * self.m_B * self.m_V / q2 ** 0.5 * self.A12(q2)
 
     def Hscalar(self, q2):
-        return self.kaellen(q2)**0.5 / q2**0.5 * self.A0(q2)
+        return self.kaellen(q2) ** 0.5 / q2 ** 0.5 * self.A0(q2)
 
     def dGamma_dq2(self, q2):
         try:
-            return self.N0 * self.V_ub ** 2 * self.kaellen(q2)**0.5 * q2 * (1 - self.m_L**2 / q2) ** 2 * (
-                (1 + self.m_L**2 / (2 * q2)) * (self.Hplus(q2) ** 2 + self.Hminus(q2) ** 2 + self.Hzero(q2) ** 2)
-                + (3 * self.m_L**2 / (2 * q2) * self.Hscalar(q2) ** 2)
+            return self.N0 * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * q2 * (1 - self.m_L ** 2 / q2) ** 2 * (
+                    (1 + self.m_L ** 2 / (2 * q2)) * (self.Hplus(q2) ** 2 + self.Hminus(q2) ** 2 + self.Hzero(q2) ** 2)
+                    + (3 * self.m_L ** 2 / (2 * q2) * self.Hscalar(q2) ** 2)
             )
         except TypeError:
             return 0
@@ -187,15 +188,46 @@ class BToVLNuBCL(BToVLNu):
 
         FFs = [self.AP(q2), self.V(q2), self.A0(q2), self.A1(q2), self.A12(q2), self.T1(q2), self.T2(q2), self.T23(q2)]
         glebsch_gordan_fix = 0.5
-        return self._V_ub**2 * glebsch_gordan_fix * getDiffRatedq2(self.m_B, self.m_V, self.m_L, q2, WCs, FFs)
+        return self._V_ub ** 2 * glebsch_gordan_fix * getDiffRatedq2(self.m_B, self.m_V, self.m_L, q2, WCs, FFs)
+
+
+class BToVLNuEvtGen(BToVLNu):
+
+    def __init__(self, m_B: float, m_V: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
+        super(BToVLNuEvtGen, self).__init__(m_B, m_V, m_L, V_ub, eta_EW)
+        self.sse_parameters = [
+            0.261, -0.29, -0.415, 1,  # A1
+            0.223, -0.93, -0.092, 1,  # A2
+            0.338, -1.37, 0.315, 1,  # V
+            0.372, -1.40, 0.437, 1,  # A0
+        ]
+
+    def F(self, q2, pars):
+        return pars[0] / (1 + pars[1] * (q2 / self.m_B ** 2) + pars[2] * (q2 / self.m_B ** 2) ** 2) ** pars[3]
+
+    def A1(self, q2):
+        return self.F(q2, self.sse_parameters[0:4])
+
+    def A2(self, q2):
+        return self.F(q2, self.sse_parameters[4:8])
+
+    def V(self, q2):
+        return self.F(q2, self.sse_parameters[8:12])
+
+    def A0(self, q2):
+        return self.F(q2, self.sse_parameters[12:16])
+
+    def A12(self, q2):
+        return ((self.m_B + self.m_V) ** 2 * (self.m_B ** 2 - self.m_V ** 2 - q2) * self.A1(q2) - self.kaellen(
+            q2) * self.A2(q2)) / (16 * self.m_B * self.m_V ** 2 * (self.m_B + self.m_V))
 
 
 if __name__ == '__main__':
-
     import matplotlib.pyplot as plt
     from uncertainties import correlated_values
     from tabulate import tabulate
     from eFFORT.plotting import init_thesis_plot_style, plot_with_errorband
+
     init_thesis_plot_style()
 
     coefficient_labels = [
@@ -304,34 +336,25 @@ if __name__ == '__main__':
     plt.show()
     plt.close()
 
-
-
     bcl_rho = BToVLNuBCL(m_B=PDG.m_Bzero, m_V=0.775, m_L=0, V_ub=3.72e-3)
     bcl_rho.coefficients = lcsr_Brho
 
     bcl_omega = BToVLNuBCL(m_B=PDG.m_Bzero, m_V=0.782, m_L=0, V_ub=3.72e-3)
     bcl_omega.coefficients = lcsr_Bomega
 
-    # tauBzero = 1.520e-12 * 1. / 6.582119e-16 / 1e-9
-    # tauBplus = 1.638e-12 * 1. / 6.582119e-16 / 1e-9
-    #
-    # plt.plot(q2range, tauBzero * bcl_rho.dGamma_dq2(q2range) * 1e6, label='B0 rho')
-    # plt.plot(q2range, tauBplus / 2 * bcl_rho.dGamma_dq2(q2range) * 1e6, label='B+ rho', ls='--')
-    #
-    # plt.plot(q2range, tauBzero * bcl_omega.dGamma_dq2(q2range) * 1e6, label='B0 omega', ls=':')
-    # plt.plot(q2range, tauBplus / 2 * bcl_omega.dGamma_dq2(q2range) * 1e6, label='B+ omega', ls='-.')
-    # plt.ylim(0, None)
-    # plt.xlabel(r'$q^2$ / (GeV$^2$)')
-    # plt.ylabel(r'$\mathrm{d}\mathcal{B} / \mathrm{d}q^2$')
-    # plt.legend()
-    # plt.tight_layout()
-    # plt.show()
-    # plt.close()
+    evtgen_rho = BToVLNuEvtGen(m_B=PDG.m_Bzero, m_V=0.775, m_L=0, V_ub=3.72e-3)
+    evtgen_omega = BToVLNuEvtGen(m_B=PDG.m_Bzero, m_V=0.782, m_L=0, V_ub=3.72e-3)
 
     plt.plot(q2range, bcl_rho.dGamma_dq2(q2range) / bcl_rho.Gamma(),
-             label=r'$B \rightarrow \rho l \nu$')
+             label=r'$B \rightarrow \rho l \nu$ BCL', color='red')
+    plt.plot(q2range, evtgen_rho.dGamma_dq2(q2range) / evtgen_rho.Gamma(),
+             label=r'$B \rightarrow \rho l \nu$ EvtGen', color='red', ls='--')
+
     plt.plot(q2range, bcl_omega.dGamma_dq2(q2range) / bcl_omega.Gamma(),
-             label=r'$B \rightarrow \omega(\rightarrow 3\pi) l \nu$', ls='--')
+             label=r'$B \rightarrow \omega(\rightarrow 3\pi) l \nu$ BCL', color='blue')
+    plt.plot(q2range, evtgen_omega.dGamma_dq2(q2range) / evtgen_omega.Gamma(),
+             label=r'$B \rightarrow \omega(\rightarrow 3\pi) l \nu$ EvtGen', color='blue', ls='--')
+
     plt.ylim(0, None)
     plt.xlabel(r'$q^2$ / (GeV$^2$)')
     plt.ylabel(r'$1/ \Gamma$ $\mathrm{d}\Gamma / \mathrm{d}q^2$')
@@ -343,8 +366,8 @@ if __name__ == '__main__':
 
     with open('lcsr_central_values.tex', 'w') as f:
         f.write(tabulate(zip(coefficient_labels,
-                             lcsr_Brho, lcsr_Brho_cov.diagonal()**0.5,
-                             lcsr_Bomega, lcsr_Bomega_cov.diagonal()**0.5),
+                             lcsr_Brho, lcsr_Brho_cov.diagonal() ** 0.5,
+                             lcsr_Bomega, lcsr_Bomega_cov.diagonal() ** 0.5),
                          [r'',
                           r'$B\rightarrow\rho$', r'$\sigma(B\rightarrow\rho)$',
                           r'$B\rightarrow\omega$', r'$\sigma(B\rightarrow\omega)$'],
