@@ -191,10 +191,10 @@ class BToVLNuBCL(BToVLNu):
         return self._V_ub ** 2 * glebsch_gordan_fix * getDiffRatedq2(self.m_B, self.m_V, self.m_L, q2, WCs, FFs)
 
 
-class BToVLNuEvtGen(BToVLNu):
+class BToVLNuEvtGenBelle(BToVLNu):
 
     def __init__(self, m_B: float, m_V: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
-        super(BToVLNuEvtGen, self).__init__(m_B, m_V, m_L, V_ub, eta_EW)
+        super(BToVLNuEvtGenBelle, self).__init__(m_B, m_V, m_L, V_ub, eta_EW)
         self.sse_parameters = [
             0.261, -0.29, -0.415, 1,  # A1
             0.223, -0.93, -0.092, 1,  # A2
@@ -342,8 +342,8 @@ if __name__ == '__main__':
     bcl_omega = BToVLNuBCL(m_B=PDG.m_Bzero, m_V=0.782, m_L=0, V_ub=3.72e-3)
     bcl_omega.coefficients = lcsr_Bomega
 
-    evtgen_rho = BToVLNuEvtGen(m_B=PDG.m_Bzero, m_V=0.775, m_L=0, V_ub=3.72e-3)
-    evtgen_omega = BToVLNuEvtGen(m_B=PDG.m_Bzero, m_V=0.782, m_L=0, V_ub=3.72e-3)
+    evtgen_rho = BToVLNuEvtGenBelle(m_B=PDG.m_Bzero, m_V=0.775, m_L=0, V_ub=3.72e-3)
+    evtgen_omega = BToVLNuEvtGenBelle(m_B=PDG.m_Bzero, m_V=0.782, m_L=0, V_ub=3.72e-3)
 
     plt.plot(q2range, bcl_rho.dGamma_dq2(q2range) / bcl_rho.Gamma(),
              label=r'$B \rightarrow \rho l \nu$ BCL', color='red')
