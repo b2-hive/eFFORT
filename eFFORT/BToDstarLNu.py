@@ -74,14 +74,14 @@ class BToDstarLNu:
     def R2(self, w: float) -> float:
         pass
 
-    def dGamma_dw_dcosLepton_dcosNeutrino_dChi(self, w, cos_l, cos_nu, chi, pdg):
+    def dGamma_dw_dcosL_dcosV_dChi(self, w, cos_l, cos_nu, chi, pdg):
         return np.where(
             np.abs(pdg) == 22,
-            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi_gamma(w, cos_l, cos_nu, chi),
-            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi_pion(w, cos_l, cos_nu, chi)
+            self.dGamma_dw_dcosL_dcosV_dChi_gamma(w, cos_l, cos_nu, chi),
+            self.dGamma_dw_dcosL_dcosV_dChi_pion(w, cos_l, cos_nu, chi)
         )
 
-    def dGamma_dw_dcosLepton_dcosNeutrino_dChi_pion(self, w, cos_l, cos_nu, chi):
+    def dGamma_dw_dcosL_dcosV_dChi_pion(self, w, cos_l, cos_nu, chi):
         sin_l = (1 - cos_l ** 2) ** 0.5
         sin_nu = (1 - cos_nu ** 2) ** 0.5
 
@@ -99,7 +99,7 @@ class BToDstarLNu:
                        + 4 * sin_l * (1 + cos_l) * sin_nu * cos_nu * np.cos(chi) * Hminus * Hzero
                )
 
-    def dGamma_dw_dcosLepton_dcosNeutrino_dChi_gamma(self, w, cos_l, cos_nu, chi):
+    def dGamma_dw_dcosL_dcosV_dChi_gamma(self, w, cos_l, cos_nu, chi):
         sin_l = (1 - cos_l ** 2) ** 0.5
         sin_nu = (1 - cos_nu ** 2) ** 0.5
 
@@ -119,25 +119,25 @@ class BToDstarLNu:
 
     def dGamma_dw(self, w, pdg):
         return scipy.integrate.nquad(
-            lambda cosl, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda cosL, cosV, chi: self.dGamma_dw_dcosL_dcosV_dChi(w, cosL, cosV, chi, pdg),
             [[-1, 1], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dcosLepton(self, cosl, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosnu, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda w, cosV, chi: self.dGamma_dw_dcosL_dcosV_dChi(w, cosl, cosV, chi, pdg),
             [[self.w_min, self.w_max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dcosNeutrino(self, cosnu, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosl, chi: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda w, cosL, chi: self.dGamma_dw_dcosL_dcosV_dChi(w, cosL, cosnu, chi, pdg),
             [[self.w_min, self.w_max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dchi(self, chi, pdg):
         return scipy.integrate.nquad(
-            lambda w, cosl, cosnu: self.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w, cosl, cosnu, chi, pdg),
+            lambda w, cosL, cosV: self.dGamma_dw_dcosL_dcosV_dChi(w, cosL, cosV, chi, pdg),
             [[self.w_min, self.w_max], [-1, 1], [-1, 1]]
         )[0]
 
@@ -146,7 +146,7 @@ class BToDstarLNu:
         w_min = 1
         w_max = (self.m_B ** 2 + self.m_Dstar ** 2) / (2 * self.m_B * self.m_Dstar)
         return scipy.integrate.nquad(
-            self.dGamma_dw_dcosLepton_dcosNeutrino_dChi,
+            self.dGamma_dw_dcosL_dcosV_dChi,
             [[w_min, w_max], [-1, 1], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
@@ -284,7 +284,7 @@ if __name__ == '__main__':
     pdg_codes = np.random.choice([22, 111, 211], len(w_range))
 
     # Example call with numpy arrays
-    print(bToDstar_BGL.dGamma_dw_dcosLepton_dcosNeutrino_dChi(w_range, cosl_range, cosnu_range, chi_range, pdg_codes))
+    print(bToDstar_BGL.dGamma_dw_dcosL_dcosV_dChi(w_range, cosl_range, cosnu_range, chi_range, pdg_codes))
 
     # print("CLN total rate: {}".format(bToDstar_CLN.Gamma()))
     # print("BGL total rate: {}".format(bToDstar_BGL.Gamma()))
