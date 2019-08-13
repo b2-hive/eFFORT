@@ -1,10 +1,9 @@
 import abc
-import numpy as np
-from eFFORT.utility import PDG
-import scipy.integrate
-import uncertainties
 
-from eFFORT.BRhoLepNuRateExp import getDiffRatedq2
+import numpy as np
+import scipy.integrate
+
+from eFFORT.utility import PDG
 
 
 class BToPLNu:
@@ -72,3 +71,19 @@ class BToPLNu:
         return scipy.integrate.quad(lambda x: self.dGamma_dq2(x).nominal_value, self.q2min, self.q2max, epsabs=1e-20)
 
 
+class BToPLNuBCL(BToPLNu):
+    pass
+
+
+class BToPLNuEvtGenBelle(BToPLNu):
+
+    def __init__(self, m_B: float, m_P: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
+        super(BToPLNuEvtGenBelle, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
+        self.parameters = [
+            0.261, -2.03, 1.293,  # fplus
+            0.261, -0.27, -0.752,  # fzero
+        ]
+
+    def fplus(self, q2):
+        pars = self.parameters[0:3]
+        return pars[0] / (1 + pars[1] * (q2 / self.m_B ** 2) + pars[2] * (q2 / self.m_B ** 2) ** 2)
