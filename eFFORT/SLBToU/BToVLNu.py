@@ -240,10 +240,10 @@ if __name__ == '__main__':
         r'$\alpha_0^{T_{23}}$', r'$\alpha_1^{T_{23}}$', r'$\alpha_2^{T_{23}}$',
     ]
 
-    lcsr_Brho = np.load('inputs/Brho_LCSR_central.npy')
-    lcsr_Brho_cov = np.load('inputs/Brho_LCSR_covariance.npy')
-    lcsr_Bomega = np.load('inputs/Bomega_LCSR_central.npy')
-    lcsr_Bomega_cov = np.load('inputs/Bomega_LCSR_covariance.npy')
+    lcsr_Brho = np.load('data/Brho_LCSR_central.npy')
+    lcsr_Brho_cov = np.load('data/Brho_LCSR_covariance.npy')
+    lcsr_Bomega = np.load('data/Bomega_LCSR_central.npy')
+    lcsr_Bomega_cov = np.load('data/Bomega_LCSR_covariance.npy')
 
     plt.imshow(lcsr_Brho_cov / np.outer(lcsr_Brho_cov.diagonal()**0.5, lcsr_Brho_cov.diagonal()**0.5),
                vmin=-1, vmax=1, cmap='seismic')

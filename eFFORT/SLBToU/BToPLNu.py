@@ -2,6 +2,7 @@ import abc
 
 import numpy as np
 import scipy.integrate
+import uncertainties
 
 from eFFORT.utility import PDG
 
@@ -68,11 +69,36 @@ class BToPLNu:
                (self.H0(q2) ** 2 * (1 + self.m_L ** 2 / 2. / q2) + 3. / 2. * self.m_L ** 2 / q2 * self.Ht(q2) ** 2)
 
     def Gamma(self):
-        return scipy.integrate.quad(lambda x: self.dGamma_dq2(x).nominal_value, self.q2min, self.q2max, epsabs=1e-20)
+        return scipy.integrate.quad(lambda x: uncertainties.nominal_value(self.dGamma_dq2(x)),
+                                    self.q2min, self.q2max, epsabs=1e-20)[0]
 
 
 class BToPLNuBCL(BToPLNu):
-    pass
+
+    def __init__(self, m_B: float, m_P: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
+        super(BToPLNuBCL, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
+        self._coefficients = None
+        self.mBstar = 5.325
+
+    @property
+    def coefficients(self):
+        return self._coefficients
+
+    @coefficients.setter
+    def coefficients(self, coefficients):
+        self._coefficients = coefficients
+        self.gamma = None  # Clear cache of normalization integral when updating coefficients
+
+    def fzero(self, q2):
+        N = 4
+        return sum([b * self.z(q2) ** n for n, b in enumerate(self._coefficients[N:])])
+
+    def fplus(self, q2):
+        N = 4
+        return 1 / (1 - q2 / self.mBstar ** 2) * sum(
+            [b * (self.z(q2) ** n - (-1) ** (n - N) * n / N * self.z(q2) ** N) for n, b in
+             enumerate(self._coefficients[:N])]
+        )
 
 
 class BToPLNuEvtGenBelle(BToPLNu):
