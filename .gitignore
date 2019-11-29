@@ -6,5 +6,5 @@
 # Project Egg Info #
 # ################ #
 eFFORT.egg-info
-eFFORT/__pycache__/
+eFFORT/**/__pycache__/**
 
