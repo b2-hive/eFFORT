@@ -1,2 +1,2 @@
-include dat/*.npy
+include data/*.npy
 hybrid/*.json
