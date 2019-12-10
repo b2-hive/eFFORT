@@ -4,7 +4,7 @@ setup(
     name='eFFORT',
     version='v.0.2.0',
     packages=find_packages(),
-    url='https://gitlab.ekp.kit.edu/mapr/eFFORT',
+    url='https://github.com/b2-hive/eFFORT',
     license='',
     author='Markus Tobias Prim, Maximilian Welsch',
     author_email='markus.prim@kit.edu',
