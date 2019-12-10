@@ -54,14 +54,13 @@ class Hybrid:
         hybrid_weight: float
             The hybrid weight w_i at the given phase space point x.
         """
-        try:
-            return hybrid_weights[
-                int(numpy.digitize(x[0], self.bins_El_B)) - 1,
-                int(numpy.digitize(x[1], self.bins_q2)) - 1,
-                int(numpy.digitize(x[2], self.bins_mX)) - 1
-            ]
-        except IndexError:
-            return 0
+        # catch bin edges index error by padding the weight table with 0 in both axis
+        padded_table = numpy.pad(hybrid_weights, [1, 1], 'constant', constant_values=0)
+        digitzed_El = numpy.digitize(x[:, 0], self.bins_El_B)
+        digitzed_q2 = numpy.digitize(x[:, 1], self.bins_q2)
+        digitzed_mX = numpy.digitize(x[:, 2], self.bins_mX)
+
+        return padded_table[digitzed_El, digitzed_q2, digitzed_mX]
 
     def generate_hybrid_weights(self, inclusive: pandas.DataFrame, exclusive: pandas.DataFrame) -> numpy.array:
         """Calculate the Hybrid weights w_i, so that the bin content in the Hybrid model is given by
