@@ -79,7 +79,15 @@ release = version
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+try:
+    import importlib
+    theme = importlib.import_module("sphinx_rtd_theme")
+    html_theme = "sphinx_rtd_theme"
+    html_theme_path = [theme.get_html_theme_path()]
+except ImportError:
+    print("Run pip install sphinx_rtd_theme to get the RTD theming.")
+    html_theme = "alabaster"
+print("html_theme='{}'".format(html_theme))
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
