@@ -1,2 +1,4 @@
-include data/*.npy
-hybrid/*.json
+include eFFORT/data/*.npy
+include eFFORT/hybrid/*.json
+include eFFORT/version.txt
+include readme.md
