@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='eFFORT',
     version='v.0.2.0',
-    packages=['eFFORT'],
+    packages=find_packages(),
     url='https://gitlab.ekp.kit.edu/mapr/eFFORT',
     license='',
     author='Markus Tobias Prim, Maximilian Welsch',
