@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import pathlib
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -57,6 +58,21 @@ autodoc_default_options = {
     "undoc-members": True,
     "show-inheritance": True,
 }
+
+# The version info for the project you're documenting, acts as replacement for
+# |version| and |release|, also used in various other places throughout the
+# built documents.
+#
+
+this_dir = pathlib.Path(__file__).resolve().parent
+with (this_dir / ".." / "eFFORT" / "version.txt").open() as vf:
+    version = vf.read()
+print("Version as read from version.txt: '{}'".format(version))
+
+# The short X.Y version.
+# version = 'dev'
+# The full version, including alpha/beta/rc tags.
+release = version
 
 # -- Options for HTML output -------------------------------------------------
 
