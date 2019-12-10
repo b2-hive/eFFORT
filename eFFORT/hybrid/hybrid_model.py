@@ -11,8 +11,8 @@ class Hybrid:
 
         The default binning is given by
           * BINS_MX: [0.0, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0, 3.5]
-          * BINS_EL":[0.0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 3.0]
-          * BINS_Q": [0.0, 2.5, 5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 25.0]
+          * BINS_EL_B:[0.0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 3.0]
+          * BINS_Q2: [0.0, 2.5, 5.0, 7.5, 10.0, 12.5, 15.0, 20.0, 25.0]
 
         which is motivated by theory. This should only be changed with proper theoretical motivation.
 
