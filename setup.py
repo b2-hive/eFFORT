@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name='eFFORT',
-    version='v.0.1.1',
+    version='v.0.2.0',
     packages=['eFFORT'],
     url='https://gitlab.ekp.kit.edu/mapr/eFFORT',
     license='',
-    author='Markus Prim',
+    author='Markus Tobias Prim, Maximilian Welsch',
     author_email='markus.prim@kit.edu',
     description='A tool for convenient reweighting between different form factors of semileptonic B decays.',
-    install_requires=['numpy', 'scipy', 'matplotlib', 'tabulate', 'uncertainties', 'numdifftools'],
+    install_requires=['numpy', 'scipy', 'matplotlib', 'tabulate', 'uncertainties', 'numdifftools', 'pandas'],
 )
