@@ -53,22 +53,27 @@ class RbfReweighter:
     from the ISGW2 to the LLSW form factor model
 
    load a DataFrame that contains generator level information for the ISGW2 and LLSW model
+   
     >>> isgw2_done = pd.read_hdf("BtoDstarstarLNu_ISGW2_Data/Done.h5")
     >>> llsw_done = pd.read_hdf("BtoDstarstarLNu_LLSW_Data/Done_nominal.h5")
 
    Create a `RBFReweighter` instance to calculate weights based on three kinematic variables
+
     >>> done_rbf = RbfReweighter(["w", "costhetal", "costhetanu"], num_bins=[10, 10, 10], limits=[(1., 1.42), (-1., 1.), (-1.,1.)])
     >>> done_rbf.create_interpolation(isgw2_done, llsw_done)
 
     export it in json format which allows to reload it later
+
     >>> done_rbf.export_to_json("done_nominal.json"))
 
     The created model can be reloaded after it has been exported
+
     >>> done_rbf = RbfReweighter.import_from_json("done_nominal.json")
 
     To calculate weights for events in a given DataFrame, just pass the corresponding
     values as arguments to a call to the `RBFReweighter` instance (the arguments ahve to
     be `numpy.array` instances)
+
     >>> done_nominal_weights = done_rbf(df["w"].values, df["costhetal"].values, df["costhetanu"].values)
 
 
