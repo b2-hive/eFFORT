@@ -1,12 +1,7 @@
 import numpy
 import pandas
 import json
-import os
 from pathlib import Path
-
-BINS_MX = numpy.array([0., 1.4, 1.6, 1.8, 2., 2.5, 3., 3.5])
-BINS_ELB = numpy.array([0., 0.5, 1., 1.25, 1.5, 1.75, 2., 2.25, 3.])
-BINS_Q2 = numpy.array([0., 2.5, 5., 7.5, 10., 12.5, 15., 20., 25.])
 
 
 class Hybrid:
