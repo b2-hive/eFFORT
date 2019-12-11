@@ -11,7 +11,6 @@ with (Path(__file__).parent / 'readme.md').open() as readme_file:
 
 setup(
     name='eFFORT',
-    version=version,
     packages=find_packages(),
     url='https://github.com/b2-hive/eFFORT',
     author='Markus Tobias Prim, Maximilian Welsch',
@@ -25,7 +24,8 @@ setup(
         'tabulate',
         'uncertainties',
         'numdifftools',
-        'pandas'
+        'pandas',
+        'click',
     ],
     include_package_data=True,
     long_description=readme,
@@ -35,4 +35,8 @@ setup(
         "License :: OSI Approved :: MIT License "
     ],
     license='MIT',
+    entry_points='''
+        [console_scripts]
+        download_btodstarstarlnu_data=eFFORT.SLBToC.utility:download_botdstarstarlnu_data
+    '''
 )
