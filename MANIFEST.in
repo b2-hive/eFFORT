@@ -1,0 +1,4 @@
+include eFFORT/data/*.npy
+include eFFORT/hybrid/*.json
+include eFFORT/version.txt
+include readme.md

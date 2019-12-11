@@ -130,6 +130,14 @@ dmypy.json
 
 # Editor configuration #
 # #################### #
+
 .idea/
 .vscode/
+
+
+# Documentation #
+# ############# #
+
+docs/_build/**
+
 
