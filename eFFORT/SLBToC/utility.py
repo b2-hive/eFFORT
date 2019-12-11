@@ -53,7 +53,7 @@ class RbfReweighter:
     from the ISGW2 to the LLSW form factor model
 
    load a DataFrame that contains generator level information for the ISGW2 and LLSW model
-   
+
     >>> isgw2_done = pd.read_hdf("BtoDstarstarLNu_ISGW2_Data/Done.h5")
     >>> llsw_done = pd.read_hdf("BtoDstarstarLNu_LLSW_Data/Done_nominal.h5")
 
@@ -71,8 +71,8 @@ class RbfReweighter:
     >>> done_rbf = RbfReweighter.import_from_json("done_nominal.json")
 
     To calculate weights for events in a given DataFrame, just pass the corresponding
-    values as arguments to a call to the `RBFReweighter` instance (the arguments ahve to
-    be `numpy.array` instances)
+    values as arguments to a call to the `RBFReweighter` instance (the arguments have to
+    be `numpy.array` instances).
 
     >>> done_nominal_weights = done_rbf(df["w"].values, df["costhetal"].values, df["costhetanu"].values)
 
@@ -99,7 +99,7 @@ class RbfReweighter:
         self._scale_factor = None
         self._rbf = None
 
-    def create_interpolation(self, origin: pd.DataFrame, target: pd.DataFrame):
+    def create_interpolation(self, origin: pd.DataFrame, target: pd.DataFrame) -> None:
         """Creates the RBF instance and calculates the normalization
         factor. Has to called once after the class is created for the
         first time. If the class is instantiated from json, this step
@@ -134,7 +134,7 @@ class RbfReweighter:
         self._create_rbf()
         self._get_scale_factor(origin)
 
-    def _get_scale_factor(self, origin_sample: pd.DataFrame):
+    def _get_scale_factor(self, origin_sample: pd.DataFrame) -> None:
         """Calculates the scale factor used for calculating the weights.
         The scale factor is used to prevent a change in the overall
         normalization and corresponds to the ratio of decay rates in the
