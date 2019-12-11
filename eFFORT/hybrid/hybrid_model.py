@@ -1,10 +1,17 @@
-import numpy
-import pandas
 import json
 from pathlib import Path
 
+import numpy
+import pandas
+
 
 class Hybrid:
+    """Create and apply the Hybrid model approach to inclusive semileptonic b -> u l nu decays.
+
+    The Hybrid model should be created for charged and neutral B mesons separately, because of the different resonances
+    contributing in the mX spectrum.
+
+    """
 
     def __init__(self, hybrid_config: str = None) -> None:
         """Initialize the hybrid weight with the given configuration.
@@ -41,7 +48,7 @@ class Hybrid:
         self.range_El_B = (self.bins_El_B[0], self.bins_El_B[1])
         self.range_q2 = (self.bins_q2[0], self.bins_q2[1])
 
-    def calculate_weight(self, x: numpy.array, hybrid_weights: numpy.array) -> float:
+    def calculate_weight(self, x: numpy.array, hybrid_weights: numpy.histogramdd) -> float:
         """Calculate the weight in the 3D phase space of the inclusive model.
 
         Parameters
@@ -55,6 +62,15 @@ class Hybrid:
         -------
         hybrid_weight: float
             The hybrid weight w_i at the given phase space point x.
+
+        Examples
+        --------
+        To apply the generated hybrid weights with :func:`~hybrid.Hybrid.generate_hybrid_weights`, use the following
+        syntax, assuming you stored the result of :func:`~hybrid.Hybrid.generate_hybrid_weights` in the variable
+        hybrid_weights, and your data is stored in the pandas.DataFrame df:
+
+            >>> # df['hybrid_weight'] = calculate_weight(df[['El_B', 'q2', 'mX']], hybrid_weights)
+
         """
         # catch bin edges index error by padding the weight table with 0 in both axis
         padded_table = numpy.pad(hybrid_weights, [1, 1], 'constant', constant_values=0)
@@ -64,15 +80,16 @@ class Hybrid:
 
         return padded_table[digitzed_El, digitzed_q2, digitzed_mX]
 
-    def generate_hybrid_weights(self, inclusive: pandas.DataFrame, exclusive: pandas.DataFrame) -> numpy.array:
+    def generate_hybrid_weights(self, inclusive: pandas.DataFrame, exclusive: pandas.DataFrame) -> numpy.histogramdd:
         """Calculate the Hybrid weights w_i, so that the bin content in the Hybrid model is given by
-        H_i = R_i + w_i I_i, where H_i is the bin content of the inclusive prediction in the Hybrid model, R_i is the bin
-        content of the resonant contributions, and I_i is the bin content of the total inclusive prediction.
+        H_i = R_i + w_i I_i, where H_i is the bin content of the inclusive prediction in the Hybrid model, R_i is the
+        bin content of the resonant contributions, and I_i is the bin content of the total inclusive prediction.
 
         The required columns in the inclusive and exclusive data frames are:
-        * mX: the invariant mass of the hadronic system (the mass of the resonance).
-        * El_B: the lepton momentum in the B reference frame.
-        * q2: the momentum transfer to the lepton-neutrino system.
+          * mX: the invariant mass of the hadronic system (the mass of the resonance).
+          * El_B: the lepton momentum in the B reference frame.
+          * q2: the momentum transfer to the lepton-neutrino system.
+          * __weight__: the weight should be adapted in a way that the individual components have the correct relative branching fractions.
 
         Parameters
         ----------
@@ -83,7 +100,7 @@ class Hybrid:
 
         Returns
         -------
-        hybrid_weights: numpy.array
+        hybrid_weights: numpy.histogramdd
             3D histogram containing the weights of the Hybrid model. To be used with
             :func:`~hybrid.Hybrid.calculate_weight`.
         """
