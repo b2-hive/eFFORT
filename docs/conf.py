@@ -12,7 +12,7 @@
 #
 import os
 import sys
-import pathlib
+from pathlib import Path
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -64,7 +64,7 @@ autodoc_default_options = {
 # built documents.
 #
 
-this_dir = pathlib.Path(__file__).resolve().parent
+this_dir = Path(__file__).resolve().parent
 with (this_dir / ".." / "eFFORT" / "version.txt").open() as vf:
     version = vf.read()
 print("Version as read from version.txt: '{}'".format(version))
@@ -93,3 +93,5 @@ print("html_theme='{}'".format(html_theme))
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
+
+html_logo = str(Path(__file__).parent.parent / "readme_assets" / "logo.svg")
