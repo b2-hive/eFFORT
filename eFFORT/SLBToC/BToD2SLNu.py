@@ -118,10 +118,13 @@ class BToD2SLNuISGW2(BToD2SLNu):
         tm=(mb-mx)*(mb-mx)
         t = mb ** 2 + mx ** 2 - 2 * w * mb * mx
         # t = self.q2(w)
+
+        # Debugging
         a = [1.2, 2.3, 3.4, 4.5]
         self.typetest3 = a
         self.typetest = t
         self.typetest2 = tm
+
         # If t=q2 above maximum, reduce it accordingly
         try:
             for i in t:
@@ -165,6 +168,11 @@ class BToD2SLNuISGW2(BToD2SLNu):
         udef = (bb2-bx2)/(2.0*bbx2) + bb2*tau/(3.0*bbx2)
         # Equation (125)
         vdef = bb2 * (1.0 + msq/msb) * (7.0 - bb2*(5+tau)/bbx2) / (6.0*bbx2)
+
+        # Debugging
+        self.db_tau = tau
+        self.db_u = udef
+        self.db_v = vdef
 
         # Equation (122): f_+ + f_- 
         fppfm = f3fppfm*np.sqrt(1.5) * ((1.0-(msd/msq)) * udef-(msd*vdef/msq))
