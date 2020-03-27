@@ -135,15 +135,11 @@ class BToEtaLNuISGW2(BToEtaLNu):
 
         # Equation (7)
         ai = -1.0 * (6.0 / (33.0 - 2.0*nf))
-        self.db_ai = ai
-        
+        # Strong coupling constants at different scales
         As_msb = self.Getas(msb,msb)
         As_msq = self.Getas(msq,msq)
-        self.db_As_msb = As_msb
-        self.db_As_msq = As_msq
         # Equation (6) without second term
         cji = (As_msb / As_msq)**ai
-        self.db_cji = cji
         # Equation (18)
         zji = msq / msb
         # Equation (16)
