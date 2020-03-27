@@ -157,7 +157,7 @@ class BToD2SLNuISGW2(BToD2SLNu):
         # See first sentence second paragraph of APPENDIX C: Leads to equation (27) which replaces exp(..) in (B1) with term in (27) where N=2 it seems.
         # N = 2 + n + n'       n and n' are the harmonicoscillator quantum numbers of the initial and final wavefunctions 
         # (i.e., N=2 for S-wave to S-wave, N=3 for S-wave to P-wave, N=4 for S-wave to S′-wave, etc.)
-        N_f3 = 4.0
+        N_f3 = 2.0
         f3 = np.sqrt(mtx/mtb) * (np.sqrt(bx2*bb2)/bbx2)**1.5 / (1.0+r2*(tm-t)/(6.0*N_f3))**N_f3
 
         # Equation (?): F_3^(f_+ + f_-)      See first few sentences in second paragraph of APPENDIX C
