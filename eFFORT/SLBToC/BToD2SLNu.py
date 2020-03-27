@@ -184,7 +184,7 @@ class BToD2SLNuISGW2(BToD2SLNu):
         fppf = (fppfm + fpmfm) / 2.0
         fpmf = (fppfm - fpmfm) / 2.0
 
-        return fppf
+        return fppf**2
 
 
 
