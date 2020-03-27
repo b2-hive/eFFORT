@@ -201,6 +201,6 @@ class BToD2SLNuISGW2(BToD2SLNu):
             if massq < 1.85:
                 nflav = 3
             
-            temp = 12.0*np.pi / (33.0-2.0*nflav*np.log(massx*massx/lqcd2))
+            temp = 12.0*np.pi / ((33.0-2.0*nflav)*np.log(massx*massx/lqcd2))
         
         return temp
