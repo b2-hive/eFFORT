@@ -47,7 +47,7 @@ class BToEtaLNuISGW2(BToEtaLNu):
 
     def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066):
 
-        super(BToEtaLNuISGW2, self).__init__(m_B, m_Eta, V_cb, eta_EW)
+        super(BToEtaLNuISGW2, self).__init__(m_B, m_Eta, V_ub, eta_EW)
 
         # ISGW2 specifics
         
