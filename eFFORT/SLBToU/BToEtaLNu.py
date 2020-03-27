@@ -137,6 +137,7 @@ class BToEtaLNuISGW2(BToEtaLNu):
         ai = -1.0 * (6.0 / (33.0 - 2.0*nf))
         # Equation (6) without second term
         cji = (self.Getas(msb,msb) / self.Getas(msq,msq))**ai
+        self.db_cji = cji
         # Equation (18)
         zji = msq / msb
         # Equation (16)
