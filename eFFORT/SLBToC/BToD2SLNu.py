@@ -78,7 +78,7 @@ class BToD2SLNuISGW2(BToD2SLNu):
     def G(self, w: float) -> float:
 
         #Probably quark masses b and d quark in GeV: See ISGW1 below equation (14), but b quark mass would be slightly off
-        #Not actual masses but masses if only valence quarks contributed to hadron mass?
+        #Not actual masses but masses if only valence quarks contributed to hadron mass perhaps?
         msb=5.2
         msd=0.33
         
@@ -86,17 +86,18 @@ class BToD2SLNuISGW2(BToD2SLNu):
         bb2=0.431*0.431
 
         # Hyperfine-averaged physical mass of B-meson
-        mbb=5.31
+        mbb=0.75*5.32 + 0.25*5.279
 
-        # Number of flavours below b 
-        nf = 4.0
+        # Number of flavours below b
+        # not used in any equation?
+        #nf = 4.0
 
         # Mass of decay meson b->qlv (from now on called daughter meson), in this case should be a charm quark
         msq=1.82
         # 
         bx2=0.45*0.45
         # Probably Hyperfine-averaged physical mass of daughter meson
-        mbx=0.75*2.01+0.25*1.87
+        mbx=0.75*2.64+0.25*2.58
         # N_f^' (N f prime): Number of flavours below daughter meson (probably)
         nfp = 3.0
 
@@ -111,8 +112,9 @@ class BToD2SLNuISGW2(BToD2SLNu):
         mx=self.m_D2S
 
         # ISGW1 Equation (B4): mu_+ and mu_-
-        mup=1.0/(1.0/msq+1.0/msb)
-        mum=1.0/(1.0/msq-1.0/msb)
+        # Not used in any equation?
+        #mup=1.0/(1.0/msq+1.0/msb)
+        #mum=1.0/(1.0/msq-1.0/msb)
 
         # ISGW1 Equation (B2): Beta_BX^2 meaning ???
         bbx2=0.5*(bb2+bx2)
@@ -122,10 +124,10 @@ class BToD2SLNuISGW2(BToD2SLNu):
         # t = self.q2(w)
 
         # Debugging
-        a = [1.2, 2.3, 3.4, 4.5]
-        self.typetest3 = a
-        self.typetest = t
-        self.typetest2 = tm
+        #a = [1.2, 2.3, 3.4, 4.5]
+        #self.typetest3 = a
+        #self.typetest = t
+        #self.typetest2 = tm
 
         # If t=q2 above maximum, reduce it accordingly
         try:
@@ -154,10 +156,11 @@ class BToD2SLNuISGW2(BToD2SLNu):
         r2 = 3.0/(4.0*msb*msq) + 3*msd*msd/(2*mbb*mbx*bbx2) + (16.0/(mbb*mbx*(33.0-2.0*nfp)))*np.log(As0/As2)
 
         # ISGW1 Equation (B1) but not exactly. Some approximation?
-        # See first sentence second paragraph of APPENDIX C: Leads to equation (27) which replaces exp(..) in (B1) with term in (27) where N=2 it seems.
+        # See first sentence second paragraph of APPENDIX C: Leads to equation (27) which replaces exp(..) in (B1) with term in (27) where N=4 it seems.
         # N = 2 + n + n'       n and n' are the harmonicoscillator quantum numbers of the initial and final wavefunctions 
         # (i.e., N=2 for S-wave to S-wave, N=3 for S-wave to P-wave, N=4 for S-wave to S′-wave, etc.)
-        f3 = np.sqrt(mtx/mtb) * (np.sqrt(bx2*bb2)/bbx2)**1.5 / (1.0+r2*(tm-t)/24.0)**4.0
+        N_f3 = 4.0
+        f3 = np.sqrt(mtx/mtb) * (np.sqrt(bx2*bb2)/bbx2)**1.5 / (1.0+r2*(tm-t)/(6.0*N_f3))**N_f3
 
         # Equation (?): F_3^(f_+ + f_-)      See first few sentences in second paragraph of APPENDIX C
         f3fppfm = f3 * (mbb/mtb)**(-0.5) * (mbx/mtx)**0.5
@@ -177,7 +180,7 @@ class BToD2SLNuISGW2(BToD2SLNu):
         self.db_v = vdef
 
         # Equation (122): f_+ + f_- 
-        fppfm = f3fppfm*np.sqrt(1.5) * ((1.0-(msd/msq)) * udef-(msd*vdef/msq))
+        fppfm = f3fppfm*np.sqrt(1.5) * ((1.0-msd/msq)*udef - msd*vdef/msq)
         # Equation (123): f_+ - f_- 
         fpmfm = f3fpmfm*np.sqrt(1.5) * (mtb/msq) * (udef+(msd*vdef/mtx))
 
