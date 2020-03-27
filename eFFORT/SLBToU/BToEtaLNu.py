@@ -41,29 +41,6 @@ class BToEtaLNu:
         w_max = (self.m_B ** 2 + self.m_Eta ** 2) / (2 * self.m_B * self.m_Eta)
         return scipy.integrate.quad(self.dGamma_dw, w_min, w_max)[0]
 
-
-class BToEtaLNuBLT(BToEtaLNu):
-
-    def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066, beta_coeff=(0.13, 1.95, -6.75)):
-
-        self.beta_0 = beta_coeff[0]
-        self.beta_1 = beta_coeff[1] 
-        self.beta_2 = beta_coeff[2] 
-
-        super(BToEtaLNuBLT, self).__init__(m_B, m_Eta, V_ub, eta_EW)
-        #super().__init__(m_B, m_D2S, V_cb, eta_EW)
-
-        
-
-
-    def G(self, w: float) -> float:
-        self.fp = self.beta_0 + self.beta_1*(w-1.0) + self.beta_2*(w-1.0)*(w-1.0)
-        # Debugging to find discrepancy between generated and modeled BLT data
-        # self.fp = 1
-        
-        return self.fp
-
-
         
 
 class BToEtaLNuISGW2(BToEtaLNu):
@@ -207,7 +184,7 @@ class BToEtaLNuISGW2(BToEtaLNu):
         
         return temp
 
-    def GetGammaji(self, double z):
+    def GetGammaji(self, z):
         temp = 2+((2.0*z)/(1-z))*np.log(z)
         temp = -1.0*temp
 
