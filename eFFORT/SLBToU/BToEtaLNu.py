@@ -136,19 +136,19 @@ class BToEtaLNuISGW2(BToEtaLNu):
         # Equation (7)
         ai = -1.0 * (6.0 / (33.0 - 2.0*nf))
         # Equation (6) without second term
-        cji = (Getas(msb,msb) / Getas(msq,msq))**ai
+        cji = (self.Getas(msb,msb) / self.Getas(msq,msq))**ai
         # Equation (18)
         zji = msq / msb
         # Equation (16)
-        gammaji = GetGammaji(zji)
+        gammaji = self.GetGammaji(zji)
         # Equation (17)
         chiji = -1.0 - gammaji/(1-zji)
         # Equations (10) & (11)
         betaji_fppfm = gammaji - (2.0/3.0)*chiji
         betaji_fpmfm = gammaji + (2.0/3.0)*chiji
         # appears in equation (101). Defintion in text above
-        rfppfm = cji * (1.0 + betaji_fppfm * Getas(msq, np.sqrt(msb*msq)) / np.pi)
-        rfpmfm = cji * (1.0 + betaji_fpmfm * Getas(msq, np.sqrt(msb*msq)) / np.pi)
+        rfppfm = cji * (1.0 + betaji_fppfm * self.Getas(msq, np.sqrt(msb*msq)) / np.pi)
+        rfpmfm = cji * (1.0 + betaji_fpmfm * self.Getas(msq, np.sqrt(msb*msq)) / np.pi)
         # Equation (?): F_3^(f_+ + f_-)      See first few sentences in second paragraph of APPENDIX C
         f3fppfm = f3 * (mbb/mtb)**(-0.5) * (mbx/mtx)**0.5
         # Equation (?): F_3^(f_+ - f_-)
