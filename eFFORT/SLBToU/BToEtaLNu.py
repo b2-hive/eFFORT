@@ -189,5 +189,3 @@ class BToEtaLNuISGW2(BToEtaLNu):
         temp = -1.0*temp
 
         return temp
-
-}
