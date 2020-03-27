@@ -137,12 +137,12 @@ class BToEtaLNuISGW2(BToEtaLNu):
         ai = -1.0 * (6.0 / (33.0 - 2.0*nf))
         self.db_ai = ai
         
-        As0 = self.Getas(msb,msb)
-        As1 = self.Getas(msq,msq)
-        self.db_As0 = As0
-        self.db_As1 = As1
+        As_msb = self.Getas(msb,msb)
+        As_msq = self.Getas(msq,msq)
+        self.db_As_msb = As_msb
+        self.db_As_msq = As_msq
         # Equation (6) without second term
-        cji = (As0 / As1)**ai
+        cji = (As_msb / As_msq)**ai
         self.db_cji = cji
         # Equation (18)
         zji = msq / msb
@@ -187,7 +187,7 @@ class BToEtaLNuISGW2(BToEtaLNu):
             if massq < 1.85:
                 nflav = 3
             
-            temp = 12.0*np.pi / (33.0-2.0*nflav*np.log(massx*massx/lqcd2))
+            temp = 12.0*np.pi / ((33.0-2.0*nflav) * np.log(massx*massx/lqcd2))
         
         return temp
 
