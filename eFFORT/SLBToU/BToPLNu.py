@@ -71,9 +71,9 @@ class BToPLNu:
     def dGamma_dw(self, w):
         # For easier variable handling in the equations
         m_B = self.m_B
-        m_Eta = self.m_Eta
+        m_P = self.m_P
 
-        return self.G_F**2 * m_Eta**3 / 48 / np.pi**3 * (m_B + m_Eta) *2 * (w**2 - 1)**(3/2) * self.eta_EW ** 2 * self.V_ub ** 2 * self.G(w)**2
+        return self.G_F**2 * m_P**3 / 48 / np.pi**3 * (m_B + m_P) *2 * (w**2 - 1)**(3/2) * self.eta_EW ** 2 * self.V_ub ** 2 * self.fplus**2
 
     def Gamma(self):
         return scipy.integrate.quad(lambda x: uncertainties.nominal_value(self.dGamma_dq2(x)),
