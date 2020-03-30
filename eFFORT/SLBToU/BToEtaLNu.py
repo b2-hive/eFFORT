@@ -196,14 +196,14 @@ class BToEtaLNuISGW2(BToEtaLNu):
 
 class BToEtaLNuLCSR_BZ(BToEtaLNu):
 
-    def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066):
-        self.parameters = [
+    def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066, param=[0.231, 0.851, 0.411, 5.33]):
+        self.parameters = param#[
         # Ball-Zwicky calculation 2007  JHEP. 0708:025
-            0.231, # fzero
-            0.851, # alpha
-            0.411,  # r
-            5.33   # mB*
-        ]
+        #    0.231, # fzero
+        #    0.851, # alpha
+        #    0.411,  # r
+        #    5.33   # mB*
+            #]
         super(BToEtaLNuLCSR_BZ, self).__init__(m_B, m_Eta, V_ub, eta_EW)
 
     def G(self, w):
