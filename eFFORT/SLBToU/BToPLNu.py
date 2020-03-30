@@ -73,7 +73,7 @@ class BToPLNu:
         m_B = self.m_B
         m_P = self.m_P
 
-        return self.G_F**2 * m_P**3 / 48 / np.pi**3 * (m_B + m_P) *2 * (w**2 - 1)**(3/2) * self.eta_EW ** 2 * self.V_ub ** 2 * self.fplus**2
+        return PDG.G_F**2 * m_P**3 / 48 / np.pi**3 * (m_B + m_P) *2 * (w**2 - 1)**(3/2) * self.eta_EW ** 2 * self.V_ub ** 2 * self.fplus**2
 
     def Gamma(self):
         return scipy.integrate.quad(lambda x: uncertainties.nominal_value(self.dGamma_dq2(x)),
