@@ -197,15 +197,14 @@ class BToEtaLNuISGW2(BToEtaLNu):
 class BToEtaLNuLCSR_BZ(BToEtaLNu):
 
     def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066):
-        super(BToEtaLNuLCSR_BZ, self).__init__(m_B, m_Eta, V_ub, eta_EW)
         self.parameters = [
         # Ball-Zwicky calculation 2007  JHEP. 0708:025
             0.231, # fzero
             0.851, # alpha
             0.411,  # r
             5.33   # mB*
-       
         ]
+        super(BToEtaLNuLCSR_BZ, self).__init__(m_B, m_Eta, V_ub, eta_EW)
 
     def G(self, w):
         q2 = self.q2(w)
@@ -221,14 +220,13 @@ class BToEtaLNuLCSR_BZ(BToEtaLNu):
 class BToEtaLNuLCSR_DM(BToEtaLNu):
 
     def __init__(self, m_B: float, m_P: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
-        super(BToEtaLNuLCSR_DM, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
         self.parameters = [
         # G. Duplancic, B. Melic calculation 2015 https://arxiv.org/abs/1508.05287  JHEP 1511 (2015) 138
             0.168, # fzero
             0.462, # alpha
             5.3252   # mB*
-       
         ]
+        super(BToEtaLNuLCSR_DM, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
 
     def G(self, w):
         q2 = self.q2(w)
