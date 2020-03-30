@@ -68,6 +68,13 @@ class BToPLNu:
         return (8. / 3. * self.N0(q2) * self.pion_momentum(q2)) * (1 - self.m_L ** 2 / q2) ** 2 * \
                (self.H0(q2) ** 2 * (1 + self.m_L ** 2 / 2. / q2) + 3. / 2. * self.m_L ** 2 / q2 * self.Ht(q2) ** 2)
 
+    def dGamma_dw(self, w):
+        # For easier variable handling in the equations
+        m_B = self.m_B
+        m_Eta = self.m_Eta
+
+        return self.G_F**2 * m_Eta**3 / 48 / np.pi**3 * (m_B + m_Eta) *2 * (w**2 - 1)**(3/2) * self.eta_EW ** 2 * self.V_ub ** 2 * self.G(w)**2
+
     def Gamma(self):
         return scipy.integrate.quad(lambda x: uncertainties.nominal_value(self.dGamma_dq2(x)),
                                     self.q2min, self.q2max, epsabs=1e-20)[0]
