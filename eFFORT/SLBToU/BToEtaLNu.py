@@ -219,14 +219,14 @@ class BToEtaLNuLCSR_BZ(BToEtaLNu):
     
 class BToEtaLNuLCSR_DM(BToEtaLNu):
 
-    def __init__(self, m_B: float, m_P: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
+    def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066):
         self.parameters = [
         # G. Duplancic, B. Melic calculation 2015 https://arxiv.org/abs/1508.05287  JHEP 1511 (2015) 138
             0.168, # fzero
             0.462, # alpha
             5.3252   # mB*
         ]
-        super(BToEtaLNuLCSR_DM, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
+        super(BToEtaLNuLCSR_DM, self).__init__(m_B, m_Eta, V_ub, eta_EW)
 
     def G(self, w):
         q2 = self.q2(w)
