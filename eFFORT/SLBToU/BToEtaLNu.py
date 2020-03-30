@@ -192,3 +192,41 @@ class BToEtaLNuISGW2(BToEtaLNu):
         temp = -1.0*temp
 
         return temp
+
+
+
+class BToEtaLNuLCSR_BZ(BToPLNu):
+
+    def __init__(self, m_B: float, m_P: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
+        super(BToEtaLNuLCSR_BZ, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
+        self.parameters = [
+        # Ball-Zwicky calculation 2007  JHEP. 0708:025
+            0.231, # fzero
+            0.851, # alpha
+            0.411,  # r
+            5.33   # mB*
+       
+        ]
+
+    def fplus(self, q2):
+        pars = self.parameters[0:4]
+        return pars[0] * ( 1./(1.- (q2/pars[3]**2)) + (pars[2] * q2 / pars[3]** 2)/((1.- q2/pars[3] ** 2)*(1.- (pars[1] *q2)/self.m_B ** 2)))
+    
+    
+    
+class BToEtaLNuLCSR_DM(BToPLNu):
+
+    def __init__(self, m_B: float, m_P: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
+        super(BToEtaLNuLCSR_DM, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
+        self.parameters = [
+        # Ball-Zwicky calculation 2007  JHEP. 0708:025
+            0.168, # fzero
+            0.462, # alpha
+            5.3252   # mB*
+       
+        ]
+
+    def fplus(self, q2):
+        pars = self.parameters[0:3]
+        return pars[0] / ((1 - q2/pars[2] **2)*(1- pars[1] * q2 /pars[2] ** 2))
+    
