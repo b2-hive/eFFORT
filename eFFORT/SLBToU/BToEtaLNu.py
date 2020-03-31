@@ -219,7 +219,7 @@ class BToEtaLNuLCSR_BZ(BToEtaLNu):
     
 class BToEtaLNuLCSR_DM(BToEtaLNu):
 
-    def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066, param=[0.186, 0.462, 5.3252]):
+    def __init__(self, m_B: float, m_Eta: float, V_ub: float, eta_EW: float = 1.0066, param=[0.168, 0.462, 5.3252]):
         self.parameters = param#[
         # G. Duplancic, B. Melic calculation 2015 https://arxiv.org/abs/1508.05287  JHEP 1511 (2015) 138
         #    0.168, # fzero
