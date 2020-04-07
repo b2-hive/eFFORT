@@ -33,7 +33,7 @@ class BToDstar2SLNu:
         # For easier variable handling in the equations
         m_B = self.m_B
         m_D = self.m_Dstar2S
-        r = m_B/m_D
+        r = m_D/m_B
 
         return self.G_F**2 * self.eta_EW ** 2 * self.V_cb**2 * m_B**5 / (48* np.pi**3) * r**3 * (1-r)**2 * (w**2-1)**(1/2) *(w+1)**2 * (1 + 4*w/(w+1) * (1-2*r*w+r**2)/(1-r)**2)  * self.G(w)**2
 
