@@ -34,7 +34,7 @@ class BToD2SLNu:
         m_B = self.m_B
         m_D = self.m_D2S
 
-        return self.G_F**2 * m_D**3 / 48 / np.pi**3 * (m_B + m_D) *2 * (w**2 - 1)**(3/2) * self.eta_EW ** 2 * self.V_cb ** 2 * self.G(w)**2
+        return self.G_F**2 * m_D**3 / 48 / np.pi**3 * (m_B + m_D)**2 * (w**2 - 1)**(3/2) * self.eta_EW ** 2 * self.V_cb ** 2 * self.G(w)**2
 
     def _Gamma(self):
         w_min = 1
