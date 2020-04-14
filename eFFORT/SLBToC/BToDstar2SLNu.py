@@ -58,9 +58,9 @@ class BToDstar2SLNuBLT(BToDstar2SLNu):
 
 
     def G(self, w: float) -> float:
-        self.fp = self.beta_0 + self.beta_1*(w-1.0) + self.beta_2*(w-1.0)*(w-1.0)
+        #self.fp = self.beta_0 + self.beta_1*(w-1.0) + self.beta_2*(w-1.0)*(w-1.0)
         # Debugging to find discrepancy between generated and modeled BLT data
-        #self.fp = 1
+        self.fp = 1
         
         return self.fp
 
