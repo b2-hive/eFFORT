@@ -45,7 +45,7 @@ class BToDstar2SLNu:
 
 class BToDstar2SLNuBLT(BToDstar2SLNu):
 
-    def __init__(self, m_B: float, m_Dstar2S: float, V_cb: float, eta_EW: float = 1.0066, beta_coeff=(0.10, 2.4, -7.0)):
+    def __init__(self, m_B: float, m_Dstar2S: float, V_cb: float, eta_EW: float = 1.0066, beta_coeff=(0.0, 0.9812, 0.0)):
 
         self.beta_0 = beta_coeff[0]
         self.beta_1 = beta_coeff[1] 
