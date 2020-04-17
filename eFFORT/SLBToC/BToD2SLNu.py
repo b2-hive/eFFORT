@@ -58,9 +58,7 @@ class BToD2SLNuBLT(BToD2SLNu):
 
     def G(self, w: float) -> float:
         self.fp = self.beta_0 + self.beta_1*(w-1.0) + self.beta_2*(w-1.0)*(w-1.0)
-        # Debugging to find discrepancy between generated and modeled BLT data
-        # self.fp = 1
-        
+                        
         return self.fp
 
 
@@ -76,6 +74,9 @@ class BToD2SLNuISGW2(BToD2SLNu):
         
 
     def G(self, w: float) -> float:
+
+        # Comments and equations are regarding arXiv:hep-ph/9503486 (Semileptonic meson decays in the quark model: An update; Scora, Daryl and Isgur, Nathan)
+        # or if specified as ISGW1: DOI:10.1103/PhysRevD.39.799 (Semileptonic B and D decays in the quark model; Scora, Daryl and Isgur, Nathan)
 
         #Probably quark masses b and d quark in GeV: See ISGW1 below equation (14), but b quark mass would be slightly off
         #Not actual masses but masses if only valence quarks contributed to hadron mass perhaps?
@@ -106,29 +107,19 @@ class BToD2SLNuISGW2(BToD2SLNu):
         # Probalby same here: m_X(daughter meson) = m_(daughter quark q: c or u quark) + m_d(quark)
         mtx = msq + msd
 
-        # B-Meson mass in GeV, already defined in class variable m_B #############################################################################################
+        # B-Meson mass in GeV
         mb=self.m_B
         # Mass of X in B->Xlv
         mx=self.m_D2S
 
-        # ISGW1 Equation (B4): mu_+ and mu_-
-        # Not used in any equation?
-        #mup=1.0/(1.0/msq+1.0/msb)
-        #mum=1.0/(1.0/msq-1.0/msb)
-
-        # ISGW1 Equation (B2): Beta_BX^2 meaning ???
+        
+        # ISGW1 Equation (B2):
         bbx2=0.5*(bb2+bx2)
         # ISGW1 Equation (B3): Maximum momentum transfer 
         tm=(mb-mx)*(mb-mx)
         t = mb ** 2 + mx ** 2 - 2 * w * mb * mx
-        # t = self.q2(w)
 
-        # Debugging
-        #a = [1.2, 2.3, 3.4, 4.5]
-        #self.typetest3 = a
-        #self.typetest = t
-        #self.typetest2 = tm
-
+        
         # If t=q2 above maximum, reduce it accordingly
         try:
             for i in t:
