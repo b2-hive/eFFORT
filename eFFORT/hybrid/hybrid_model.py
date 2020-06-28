@@ -1,5 +1,7 @@
 import json
+from os import PathLike
 from pathlib import Path
+from typing import Union
 
 import numpy
 import pandas
@@ -13,7 +15,7 @@ class Hybrid:
 
     """
 
-    def __init__(self, hybrid_config: str = None) -> None:
+    def __init__(self, hybrid_config: Union[str, bytes, PathLike] = None) -> None:
         """Initialize the hybrid weight with the given configuration.
 
         The default binning is given by
