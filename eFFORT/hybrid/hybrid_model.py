@@ -26,10 +26,14 @@ class Hybrid:
         Parameters
         ----------
         hybrid_config: str
-            Path to json file defining the binning of the Hybrid model. Has to contain the three attributes:
-              * BINS_MX: The binning for the Hybrid model in mX.
-              * BINS_ELB: The binning of the Hybrid model in El_B.
-              * BINS_Q2: The binning of the Hybrid model in q2.
+            Path to json file defining the binning of the Hybrid model. Has to contain the six attributes:
+              * MX['column_name']: The name of the dataframe column containing mX.
+              * ELB['column_name']: The name of the dataframe column containing El_B.
+              * Q2['column_name']: The name of the dataframe column containing q2.
+
+              * MX['bins']: The binning for the Hybrid model in mX.
+              * ELB['bins']: The binning of the Hybrid model in El_B.
+              * Q2['bins']: The binning of the Hybrid model in q2.
 
         """
 
@@ -40,9 +44,13 @@ class Hybrid:
         with open(hybrid_config) as json_file:
             config = json.load(json_file)
 
-        self.bins_mX = config['BINS_MX']
-        self.bins_El_B = config['BINS_ELB']
-        self.bins_q2 = config['BINS_Q2']
+        self.name_mX = config['MX']['column_name']
+        self.name_El_B = config['ELB']['column_name']
+        self.name_q2 = config['Q2']['column_name']
+
+        self.bins_mX = config['MX']['bins']
+        self.bins_El_B = config['ELB']['bins']
+        self.bins_q2 = config['Q2']['bins']
 
         self.range_mX = (self.bins_mX[0], self.bins_mX[1])
         self.range_El_B = (self.bins_El_B[0], self.bins_El_B[1])
@@ -69,7 +77,7 @@ class Hybrid:
         syntax, assuming you stored the result of :func:`~hybrid.Hybrid.generate_hybrid_weights` in the variable
         hybrid_weights, and your data is stored in the pandas.DataFrame df:
 
-            >>> # df['hybrid_weight'] = calculate_weight(df[['El_B', 'q2', 'mX']], hybrid_weights)
+            >>> # df['hybrid_weight'] = calculate_weight(df[['El_B', 'q2', 'mX']].values, hybrid_weights)
 
         """
         # catch bin edges index error by padding the weight table with 0 in both axis
@@ -90,6 +98,7 @@ class Hybrid:
           * El_B: the lepton momentum in the B reference frame.
           * q2: the momentum transfer to the lepton-neutrino system.
           * __weight__: the weight should be adapted in a way that the individual components have the correct relative branching fractions.
+        The given names are defaults from hybrid_binning.json, alternative names can be set there.
 
         Parameters
         ----------
@@ -105,7 +114,7 @@ class Hybrid:
             :func:`~hybrid.Hybrid.calculate_weight`.
         """
         H_exc, _ = numpy.histogramdd(
-            exclusive[['El_B', 'q2', 'mX']].values,
+            exclusive[[self.name_El_B, self.name_q2, self.name_mX]].values,
             bins=[self.bins_El_B, self.bins_q2, self.bins_mX],
             range=[self.range_El_B, self.range_q2, self.range_mX],
             normed=False,
@@ -113,7 +122,7 @@ class Hybrid:
         )
 
         H_incl, _ = numpy.histogramdd(
-            inclusive[['El_B', 'q2', 'mX']].values,
+            inclusive[[self.name_El_B, self.name_q2, self.name_mX]].values,
             bins=[self.bins_El_B, self.bins_q2, self.bins_mX],
             range=[self.range_El_B, self.range_q2, self.range_mX],
             normed=False,
