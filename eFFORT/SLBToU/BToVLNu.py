@@ -186,6 +186,35 @@ class BToVLNu:
             [[self.q2min, self.q2max], [-1, 1], [-1, 1]]
         )[0]
 
+    def dGamma_dq2_dcosV_lambda_plus(self, q2, cos_v):
+        # Do the evaluation of the form factors only once.
+        Hplus = self.Hplus(q2)
+        Hminus = self.Hminus(q2)
+        Hzero = self.Hzero(q2)
+        Hscalar = self.Hscalar(q2)
+
+        return 3/4 * self.N0 * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * (1 - self.m_L ** 2 / q2) ** 2 * (
+            self.m_L ** 2 / q2 * (
+                (Hzero * cos_v + Hscalar) ** 2
+                + 1/2 * (1 - cos_v**2) * (Hplus ** 2 + Hminus **2)
+            )
+        )
+
+    def dGamma_dq2_dcosV_lambda_minus(self, q2, cos_v):
+        # Do the evaluation of the form factors only once.
+        Hplus = self.Hplus(q2)
+        Hminus = self.Hminus(q2)
+        Hzero = self.Hzero(q2)
+
+        return 3/4 * self.N0 * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * (1 - self.m_L ** 2 / q2) ** 2 * (
+            (1 - cos_v ** 2) * Hzero ** 2
+            + 1/2 * (1 - cos_v) ** 2 * Hplus ** 2
+            + 1/2 * (1 + cos_v) ** 2 * Hminus ** 2
+        )
+
+    def dGamma_dq2_dcosV(self, q2, cos_v):
+        return self.dGamma_dq2_dcosV_lambda_plus(q2, cos_v) + self.dGamma_dq2_dcosV_lambda_minus(q2, cos_v)
+    
 
 class BToVLNuBCL(BToVLNu):
 
