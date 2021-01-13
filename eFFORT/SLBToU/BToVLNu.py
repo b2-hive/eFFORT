@@ -111,6 +111,81 @@ class BToVLNu:
             self.gamma *= (self.q2max - self.q2min)  # Total rate should not be divided by bin width
         return self.gamma
 
+    def dGamma_dw_dcosL_dcosV_dChi(self, q2, cos_l, cos_v, chi):
+        """Differential decay rate with respect to the momentum transfer and the helicity angles with full lepton mass 
+        effects.
+
+        Arguments:
+            q2: momentum transfer
+            cos_l: ...
+            cos_v: ...
+            chi: ...
+
+        Returns:
+            The rate evaluated at the given set of variables. If the class was initialized with values from the
+            uncertainties package it will return the rate together with the uncertainty.
+            Nota bene: The latter feature is currently no supported.
+
+        """
+        # Do some expensive trigonometric evaluations only once.
+        cos_l_sq = cos_l ** 2
+        cos_v_sq = cos_v ** 2
+        sin_l_sq = (1 - cos_l_sq)
+        sin_v_sq = (1 - cos_v_sq)
+        sin_l = sin_l_sq ** 0.5
+        sin_v = sin_v_sq ** 0.5
+        # TODO: Replace explicit mathematical expressions in the return by the ones calculated here above.
+
+        # Do the evaluation of the form factors only once.
+        Hplus = self.Hplus(q2)
+        Hminus = self.Hminus(q2)
+        Hzero = self.Hzero(q2)
+        Hscalar = self.Hscalar(q2)
+
+        return self.N0 / (2*np.pi) * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * q2 * (1 - self.m_L **2 / q2) ** 2 * (
+            3/8 * (1 + cos_l ** 2) * 3/4 * (1 - cos_v **2) * (Hplus ** 2 + Hminus ** 2)
+            + 3/4 * (1 - cos_l ** 2) * 3/2 * cos_v ** 2 * Hzero ** 2
+            - 3/4 * (1 - cos_l ** 2) * np.cos(2*chi) * 3/4 * (1 - cos_v ** 2) * Hplus * Hminus
+            - 9/32 * 2 * (1 - cos_l ** 2) ** 0.5 * cos_l * np.cos(chi) * 2 * (1 - cos_v**2) ** 0.5 * cos_v * (Hplus * Hzero + Hminus * Hzero)
+            - 3/4 * cos_l * 3/4 * (1 - cos_v ** 2) * (Hplus**2 - Hminus**2)
+            + 9/16 * (1 - cos_l ** 2) ** 0.5 * np.cos(chi) * 2 * (1 - cos_v ** 2) ** 0.5 * cos_v * (Hplus * Hzero - Hminus * Hzero)
+            + 3/4 * (1 - cos_l ** 2) * 3/4 * (1 - cos_v ** 2) * self.m_L ** 2  / (2*q2) * (Hplus ** 2 + Hminus ** 2)
+            + 3/2 * cos_l ** 2 * 3/2 * cos_v ** 2 * self.m_L ** 2 / (2*q2) * Hzero ** 2
+            + 3/4 * (1 - cos_l ** 2) * np.cos(2*chi) * 3/4 * (1 - cos_v ** 2) * self.m_L ** 2 / (2*q2) * Hplus * Hminus
+            + 9/16 * 2 * (1 - cos_l ** 2) ** 0.5 * cos_l * np.cos(chi) * 2 * (1 - cos_v ** 2) ** 0.5 * cos_v * self.m_L ** 2 / (2*q2) * (Hplus * Hzero + Hminus * Hzero)
+            + 9/2 * cos_v ** 2 * 1/2 * self.m_L ** 2 / (2*q2) * Hscalar**2
+            + 3 * cos_l * 3/2 * cos_v ** 2 * self.m_L ** 2 / (2*q2) * Hscalar * Hzero
+            + 9/8 * (1 - cos_l ** 2) ** 0.5 * np.cos(chi) * 2 * (1 - cos_v**2) ** 0.5 * cos_v * self.m_L ** 2 / (2*q2) * (Hplus * Hscalar + Hminus * Hscalar)
+            )
+
+    def dGamma_dq2_(self, q2):
+        """1D rate from explicit integration of the 4D rate. Sould give the same result as the analytical solution implemented in dGamma_dq2."""
+        return scipy.integrate.nquad(
+            lambda cos_l, cos_v, chi: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            [[-1, 1], [-1, 1], [0, 2 * np.pi]]
+        )[0]
+
+    def dGamma_dcosL_(self, cos_l):
+        """1D rate from explicit integration of the 4D rate."""
+        return scipy.integrate.nquad(
+            lambda q2, cos_v, chi: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            [[self.q2min, self.q2max], [-1, 1], [0, 2 * np.pi]]
+        )[0]
+
+    def dGamma_dcosV_(self, cos_v):
+        """1D rate from explicit integration of the 4D rate."""
+        return scipy.integrate.nquad(
+            lambda q2, cos_l, chi: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            [[self.q2min, self.q2max], [-1, 1], [0, 2 * np.pi]]
+        )[0]
+
+    def dGamma_dChi_(self, chi):
+        """1D rate from explicit integration of the 4D rate."""
+        return scipy.integrate.nquad(
+            lambda q2, cos_l, cos_v: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            [[self.q2min, self.q2max], [-1, 1], [-1, 1]]
+        )[0]
+
 
 class BToVLNuBCL(BToVLNu):
 
