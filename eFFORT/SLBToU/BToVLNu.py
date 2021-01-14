@@ -130,11 +130,12 @@ class BToVLNu:
         # Do some expensive trigonometric evaluations only once.
         cos_l_sq = cos_l ** 2
         cos_v_sq = cos_v ** 2
-        sin_l_sq = (1 - cos_l_sq)
-        sin_v_sq = (1 - cos_v_sq)
+        sin_l_sq = 1 - cos_l_sq
+        sin_v_sq = 1 - cos_v_sq
         sin_l = sin_l_sq ** 0.5
         sin_v = sin_v_sq ** 0.5
-        # TODO: Replace explicit mathematical expressions in the return by the ones calculated here above.
+        cos_chi = np.cos(chi)
+        cos_2chi = np.cos(2*chi)
 
         # Do the evaluation of the form factors only once.
         Hplus = self.Hplus(q2)
@@ -142,20 +143,23 @@ class BToVLNu:
         Hzero = self.Hzero(q2)
         Hscalar = self.Hscalar(q2)
 
-        return self.N0 / (2*np.pi) * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * q2 * (1 - self.m_L **2 / q2) ** 2 * (
-            3/8 * (1 + cos_l ** 2) * 3/4 * (1 - cos_v **2) * (Hplus ** 2 + Hminus ** 2)
-            + 3/4 * (1 - cos_l ** 2) * 3/2 * cos_v ** 2 * Hzero ** 2
-            - 3/4 * (1 - cos_l ** 2) * np.cos(2*chi) * 3/4 * (1 - cos_v ** 2) * Hplus * Hminus
-            - 9/32 * 2 * (1 - cos_l ** 2) ** 0.5 * cos_l * np.cos(chi) * 2 * (1 - cos_v**2) ** 0.5 * cos_v * (Hplus * Hzero + Hminus * Hzero)
-            - 3/4 * cos_l * 3/4 * (1 - cos_v ** 2) * (Hplus**2 - Hminus**2)
-            + 9/16 * (1 - cos_l ** 2) ** 0.5 * np.cos(chi) * 2 * (1 - cos_v ** 2) ** 0.5 * cos_v * (Hplus * Hzero - Hminus * Hzero)
-            + 3/4 * (1 - cos_l ** 2) * 3/4 * (1 - cos_v ** 2) * self.m_L ** 2  / (2*q2) * (Hplus ** 2 + Hminus ** 2)
-            + 3/2 * cos_l ** 2 * 3/2 * cos_v ** 2 * self.m_L ** 2 / (2*q2) * Hzero ** 2
-            + 3/4 * (1 - cos_l ** 2) * np.cos(2*chi) * 3/4 * (1 - cos_v ** 2) * self.m_L ** 2 / (2*q2) * Hplus * Hminus
-            + 9/16 * 2 * (1 - cos_l ** 2) ** 0.5 * cos_l * np.cos(chi) * 2 * (1 - cos_v ** 2) ** 0.5 * cos_v * self.m_L ** 2 / (2*q2) * (Hplus * Hzero + Hminus * Hzero)
-            + 9/2 * cos_v ** 2 * 1/2 * self.m_L ** 2 / (2*q2) * Hscalar**2
-            + 3 * cos_l * 3/2 * cos_v ** 2 * self.m_L ** 2 / (2*q2) * Hscalar * Hzero
-            + 9/8 * (1 - cos_l ** 2) ** 0.5 * np.cos(chi) * 2 * (1 - cos_v**2) ** 0.5 * cos_v * self.m_L ** 2 / (2*q2) * (Hplus * Hscalar + Hminus * Hscalar)
+        # Calculate lepton mass factor only once
+        ml2over2q2 = self.m_L ** 2 / (2*q2)
+
+        return self.N0 / (2*np.pi) * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * q2 * (1 - self.m_L ** 2 / q2) ** 2 * (
+            3/8 * (1 + cos_l_sq) * 3/4 * sin_v_sq * (Hplus ** 2 + Hminus ** 2)
+            + 3/4 * sin_l_sq * 3/2 * cos_v_sq * Hzero ** 2
+            - 3/4 * sin_l_sq * cos_2chi * 3/4 * sin_v_sq * Hplus * Hminus
+            - 9/32 * 2 * sin_l * cos_l * cos_chi * 2 * sin_v * cos_v * (Hplus * Hzero + Hminus * Hzero)
+            - 3/4 * cos_l * 3/4 * sin_v_sq * (Hplus**2 - Hminus**2)
+            + 9/16 * sin_l * cos_chi * 2 * sin_v * cos_v * (Hplus * Hzero - Hminus * Hzero)
+            + 3/4 * sin_l_sq * 3/4 * sin_v_sq * ml2over2q2 * (Hplus ** 2 + Hminus ** 2)
+            + 3/2 * cos_l_sq * 3/2 * cos_v_sq * ml2over2q2 * Hzero ** 2
+            + 3/4 * sin_l_sq * cos_2chi * 3/4 * sin_v_sq * ml2over2q2 * Hplus * Hminus
+            + 9/16 * 2 * sin_l * cos_l * cos_chi * 2 * sin_v * cos_v * ml2over2q2 * (Hplus * Hzero + Hminus * Hzero)
+            + 9/2 * cos_v_sq * 1/2 * ml2over2q2 * Hscalar**2
+            + 3 * cos_l * 3/2 * cos_v_sq * ml2over2q2 * Hscalar * Hzero
+            + 9/8 * sin_l * cos_chi * 2 * sin_v * cos_v * ml2over2q2 * (Hplus * Hscalar + Hminus * Hscalar)
             )
 
     def dGamma_dq2_(self, q2):
