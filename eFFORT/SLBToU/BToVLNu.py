@@ -220,6 +220,28 @@ class BToVLNu:
         return self.dGamma_dq2_dcosL_lambda_plus(q2, cos_l) + self.dGamma_dq2_dcosL_lambda_minus(q2, cos_l)
     
 
+    def dA_FB_dq2(self, q2):
+        """Calculate differential forward-backward asymmetry."""
+        A_F = scipy.integrate.quad(lambda cos_l: self.dGamma_dq2_dcosL(q2, cos_l), 0, 1)[0]
+        A_B = scipy.integrate.quad(lambda cos_l: self.dGamma_dq2_dcosL(q2, cos_l), -1, 0)[0]
+        return (A_F - A_B) / (A_F + A_B)
+
+    def A_FB(self):
+        """Calculate forward-backward asymmetry."""
+        return scipy.integrate.quad(lambda q2: self.dA_FB_dq2(q2), self.q2min, self.q2max)[0]
+
+    def F_L(self):
+        """Calculate meson longitudinal fraction."""
+        dGamma_at_cosV_one = scipy.integrate.nquad(lambda q2, cos_l, chi: self.dGamma_dq2_dcosL_dcosV_dChi(q2, cos_l, 1, chi), [[self.q2min, self.q2max], [-1, 1], [0, 2*np.pi]])[0]
+        Gamma = scipy.integrate.nquad(lambda q2, cos_l, cos_v, chi: self.dGamma_dq2_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi), [[self.q2min, self.q2max], [-1, 1], [-1, 1], [0, 2*np.pi]])[0]
+        return 2/3. * dGamma_at_cosV_one / Gamma
+
+    def P(self):
+        """Calculate lepton polarization."""
+        Gamma_minus = scipy.integrate.nquad(lambda q2, cos_v: self.dGamma_dq2_dcosL_lambda_minus(q2, cos_v), [[self.q2min, self.q2max], [-1, 1]])[0]
+        Gamma_plus = scipy.integrate.nquad(lambda q2, cos_v: self.dGamma_dq2_dcosL_lambda_plus(q2, cos_v), [[self.q2min, self.q2max], [-1, 1]])[0]
+        return (Gamma_minus - Gamma_plus) / (Gamma_minus + Gamma_plus)
+
 class BToVLNuBCL(BToVLNu):
 
     def __init__(self, m_B: float, m_V: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
