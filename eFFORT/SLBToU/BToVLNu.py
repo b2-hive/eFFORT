@@ -32,9 +32,9 @@ class BToVLNu:
         self.tzero = self.tplus * (1 - (1 - self.tminus / self.tplus) ** 0.5)
 
         self.q2min = self.m_L ** 2
-        self.q2min += 1e-3  # numerical stability
+        self.q2min += 1e-5  # numerical stability
         self.q2max = self.m_B ** 2 + self.m_V ** 2 - 2 * self.m_B * self.m_V
-        self.q2max -= 1e-3  # numerical stability
+        self.q2max -= 1e-5  # numerical stability
 
         self.gamma = None
 
@@ -111,7 +111,7 @@ class BToVLNu:
             self.gamma *= (self.q2max - self.q2min)  # Total rate should not be divided by bin width
         return self.gamma
 
-    def dGamma_dw_dcosL_dcosV_dChi(self, q2, cos_l, cos_v, chi):
+    def dGamma_dq2_dcosL_dcosV_dChi(self, q2, cos_l, cos_v, chi):
         """Differential decay rate with respect to the momentum transfer and the helicity angles with full lepton mass 
         effects.
 
@@ -161,59 +161,59 @@ class BToVLNu:
     def dGamma_dq2_(self, q2):
         """1D rate from explicit integration of the 4D rate. Sould give the same result as the analytical solution implemented in dGamma_dq2."""
         return scipy.integrate.nquad(
-            lambda cos_l, cos_v, chi: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            lambda cos_l, cos_v, chi: self.dGamma_dq2_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
             [[-1, 1], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dcosL_(self, cos_l):
         """1D rate from explicit integration of the 4D rate."""
         return scipy.integrate.nquad(
-            lambda q2, cos_v, chi: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            lambda q2, cos_v, chi: self.dGamma_dq2_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
             [[self.q2min, self.q2max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dcosV_(self, cos_v):
         """1D rate from explicit integration of the 4D rate."""
         return scipy.integrate.nquad(
-            lambda q2, cos_l, chi: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            lambda q2, cos_l, chi: self.dGamma_dq2_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
             [[self.q2min, self.q2max], [-1, 1], [0, 2 * np.pi]]
         )[0]
 
     def dGamma_dChi_(self, chi):
         """1D rate from explicit integration of the 4D rate."""
         return scipy.integrate.nquad(
-            lambda q2, cos_l, cos_v: self.dGamma_dw_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
+            lambda q2, cos_l, cos_v: self.dGamma_dq2_dcosL_dcosV_dChi(q2, cos_l, cos_v, chi),
             [[self.q2min, self.q2max], [-1, 1], [-1, 1]]
         )[0]
 
-    def dGamma_dq2_dcosV_lambda_plus(self, q2, cos_v):
+    def dGamma_dq2_dcosL_lambda_plus(self, q2, cos_l):
         # Do the evaluation of the form factors only once.
         Hplus = self.Hplus(q2)
         Hminus = self.Hminus(q2)
         Hzero = self.Hzero(q2)
         Hscalar = self.Hscalar(q2)
 
-        return 3/4 * self.N0 * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * (1 - self.m_L ** 2 / q2) ** 2 * (
+        return 3/4 * self.N0 * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * q2 * (1 - self.m_L ** 2 / q2) ** 2 * (
             self.m_L ** 2 / q2 * (
-                (Hzero * cos_v + Hscalar) ** 2
-                + 1/2 * (1 - cos_v**2) * (Hplus ** 2 + Hminus **2)
+                (Hzero * cos_l + Hscalar) ** 2
+                + 1/2 * (1 - cos_l**2) * (Hplus ** 2 + Hminus **2)
             )
         )
 
-    def dGamma_dq2_dcosV_lambda_minus(self, q2, cos_v):
+    def dGamma_dq2_dcosL_lambda_minus(self, q2, cos_l):
         # Do the evaluation of the form factors only once.
         Hplus = self.Hplus(q2)
         Hminus = self.Hminus(q2)
         Hzero = self.Hzero(q2)
 
-        return 3/4 * self.N0 * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * (1 - self.m_L ** 2 / q2) ** 2 * (
-            (1 - cos_v ** 2) * Hzero ** 2
-            + 1/2 * (1 - cos_v) ** 2 * Hplus ** 2
-            + 1/2 * (1 + cos_v) ** 2 * Hminus ** 2
+        return 3/4 * self.N0 * self.V_ub ** 2 * self.kaellen(q2) ** 0.5 * q2 * (1 - self.m_L ** 2 / q2) ** 2 * (
+            (1 - cos_l ** 2) * Hzero ** 2
+            + 1/2 * (1 - cos_l) ** 2 * Hplus ** 2
+            + 1/2 * (1 + cos_l) ** 2 * Hminus ** 2
         )
 
-    def dGamma_dq2_dcosV(self, q2, cos_v):
-        return self.dGamma_dq2_dcosV_lambda_plus(q2, cos_v) + self.dGamma_dq2_dcosV_lambda_minus(q2, cos_v)
+    def dGamma_dq2_dcosL(self, q2, cos_l):
+        return self.dGamma_dq2_dcosL_lambda_plus(q2, cos_l) + self.dGamma_dq2_dcosL_lambda_minus(q2, cos_l)
     
 
 class BToVLNuBCL(BToVLNu):
