@@ -106,8 +106,14 @@ class BToPLNuEvtGenBelle(BToPLNu):
     def __init__(self, m_B: float, m_P: float, m_L: float, V_ub: float, eta_EW: float = 1.0066):
         super(BToPLNuEvtGenBelle, self).__init__(m_B, m_P, m_L, V_ub, eta_EW)
         self.parameters = [
-            0.261, -2.03, 1.293,  # fplus
-            0.261, -0.27, -0.752,  # fzero
+        
+           # original SLPole in EvtGen
+           # 0.261, -2.03, 1.293,  # fplus
+           # 0.261, -0.27, -0.752,  # fzero
+           
+           # modified SLPole used for new hybrid samples in /home/belle2/mapr/BToPiLNu/gsim/mdst
+           0.281, -1.444, 0.4484, 1,
+           0.281, -0.8059, 0.09872, 1
         ]
 
     def fplus(self, q2):
