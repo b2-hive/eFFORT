@@ -100,6 +100,7 @@ class Hybrid:
           * El_B: the lepton momentum in the B reference frame.
           * q2: the momentum transfer to the lepton-neutrino system.
           * __weight__: the weight should be adapted in a way that the individual components have the correct relative branching fractions.
+
         The given names are defaults from hybrid_binning.json, alternative names can be set there.
 
         Parameters
