@@ -13,7 +13,15 @@ class PDG:
     m_Dstarzero = 2.00685  # http://pdg.lbl.gov/2018/listings/rpp2018-list-D-star-2007-zero.pdf
     m_Dstarplus = 2.01026  # http://pdg.lbl.gov/2018/listings/rpp2018-list-D-star-2010-plus-minus.pdf
     G_F = 1.1663787e-5  # http://pdg.lbl.gov/2018/reviews/rpp2018-rev-phys-constants.pdf
+    
+    # following from http://pdg.lbl.gov/2019/tables/rpp2019-sum-mesons.pdf
+    m_Piplus = 0.13957061
+    m_Pizero = 0.1349770
+    m_Eta = 0.547862
+    m_Etap = 0.95778
 
+    m_Omega = 0.78265
+    m_Rho = 0.77526
 
 def w(q2: float, m_parent: float, m_daughter: float) -> float:
     """
